@@ -68,16 +68,8 @@ namespace Banshee.Base
                         break;
                     case CommonTags.Copyright:
                         track.Copyright = Choose((string)tag.Value, track.Copyright);
-                        track.License = CreativeCommons.VerifyLicense(track);
+                        CreativeCommons.VerifyLicense(track);
                         break;
-                    /* case CommonTags.WCOP: // Is one tag garanteed to be parsed before the other?
-                        track.LicenseClaimURI = Choose((string)tag.Value, track.LicenseClaimURI);
-                        track.License = LicenseVerifier.VerifyClaim(track);
-                        break;
-                    case CommonTags.WOAF:
-                    	track.LicenseVerificationURI = Choose((string)tag.Value, track.LicenseVerificationURI);
-                        track.License = LicenseVerifier.VerifyClaim(track);
-                    	break; */
                     case CommonTags.TrackNumber:
                         uint track_number = (uint)tag.Value;
                         track.TrackNumber = track_number == 0 ? track.TrackNumber : track_number;
@@ -95,10 +87,10 @@ namespace Banshee.Base
                     case CommonTags.StreamType:
                         track.MimeType = (string)tag.Value;
                         break;
-                    default:
+                    /* default:
                     	Console.WriteLine("=== TAG UNMERGED ===");
                     	Console.WriteLine(tag.ToString());
-                    	break;
+                    	break; */
                 }
             } catch {
             }

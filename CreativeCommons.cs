@@ -7,144 +7,105 @@
 
 using System;
 using System.IO;
-using System.Web;
-using System.Net;
 using System.Xml;
+using System.Xml.XPath;
 using System.Text;
 using System.Security.Cryptography;
+
 using Banshee.Base;
 using CCLicenseLib.Utilities;
 
 namespace Banshee.Base
 {
-    public struct TrackLicenseClaim
-    {
-        public string TrackPath;
-        public string LicenseUri;
-        public string MetadataUri;
-       
-        public override string ToString()
-        {
-            return String.Format("Under \"{0}\" verify at \"{1}\"", LicenseUri, MetadataUri);
-        }
-    }
-
 	public static class CreativeCommons
 	{
 	    private const string HTTP_STRING = "http://";
-		private const string VERIFY_STRING = "verify at "; // language that denotes where to verify license
-		private const int VERIFY_LENGTH = 10;              // length to skip to get the uri
+		private const string VERIFY_STRING = "verify at ";
+		private const int VERIFY_LENGTH = 10;
 
-		public static string VerifyLicense(TrackInfo track)
+		public static void VerifyLicense(TrackInfo track)
 		{
-	        // Get License and metadata URIs
-	        TrackLicenseClaim claim;
+		    string license_uri;
+            string metadata_uri;
+        	
 	        try {
-                claim = BuildClaim(track);
+                ParseClaim(track, out license_uri, out metadata_uri);
 	        } catch(ArgumentException e) {
                 Console.WriteLine(e);
-                return null;    
+                return;    
 	        }
 
-            // Get CC RDF metadata
-			RDFParser metadata_parser = new RDFParser(claim.MetadataUri, true);
-			// Get Metadata's License Uri
-			Console.WriteLine("Getting Metadata's License URI");
-			string metadata_license_uri = GetMetadataLicenseURI(metadata_parser.GetRDFAsString(), claim);
-			
-			// Check Claim
-			Console.WriteLine("Checking Claim");
-			if(metadata_license_uri == claim.LicenseUri) {
-			    return claim.LicenseUri;
+			RDFParser metadata_parser = new RDFParser(metadata_uri, true);
+			if(LicenseInMetadata(license_uri,
+					HexDigest(track.Uri.AbsolutePath),
+					metadata_parser.GetRDFAsString())) {
+				SetLicense(track, license_uri);
 			}
-			// Check if claim.LicenseUri == metadata_license_uri
-			/*if(license_hash == metadata_hash) {
-				return GetLicenseName(metadata_parser.GetRDFAsString());
-			} else {
-				// Use Banshee log to record the error
-				return "False Claim";
-			}*/
-			return "hey";
 		}
 		
-		// Get License and metadata URIs
-		private static TrackLicenseClaim BuildClaim(TrackInfo track)
+		private static void SetLicense(TrackInfo track, string license_uri) {
+			track.License = GetLicenseName(license_uri);
+		}
+		
+		private static void ParseClaim(TrackInfo track, out string license_uri, out string metadata_uri)
 		{
-		    TrackLicenseClaim claim = new TrackLicenseClaim();
-
+		    /* WCOP/WOAF and TCOP parsing */
 	    	if((track.LicenseUri != null) &&
-			   (track.MetadataUri != null)) { // WCOP/WOAF method
-			    Console.WriteLine("== WCOP ==");
-				claim.LicenseUri = track.LicenseUri;
-			    claim.MetadataUri = track.MetadataUri;
-			} else if(track.Copyright != null) { // TCOP method (depricated)
-			    Console.WriteLine("== TCOP ==");
-				claim.LicenseUri = ParseLicenseURI(track.Copyright);
-			    claim.MetadataUri = ParseMetadataURI(track.Copyright);
-			} else { // No claim
+			   (track.MetadataUri != null)) {
+				license_uri = track.LicenseUri;
+			    metadata_uri = track.MetadataUri;
+			} else if(track.Copyright != null) {
+				license_uri = ParseLicenseUri(track.Copyright);
+			    metadata_uri = ParseMetadataUri(track.Copyright);
+			} else {
 				throw new ArgumentException("No license claim was made.");
 			}
-			
-			claim.TrackPath = track.Uri.AbsolutePath;
-			
-			return claim;
 		}
 		
-		// TODO: Is it better to do all the parsing here or in steps of regex and xmltextreader?
-		// Extract the license URI from the rdf tag
-		private static string GetMetadataLicenseURI(string rdf, TrackLicenseClaim claim)
-		{
-			try {
-			    // Parse the RDF
-                XmlTextReader reader = new XmlTextReader(new StringReader(rdf));
-                
-                XmlDocument doc = new XmlDocument();
-                doc.Load(reader);
-                XmlNode docElement = doc.DocumentElement;
-                
-                // Hash the media file
-                Console.WriteLine("Making Hasher");
-                SHA1Managed hasher = new SHA1Managed();
-                Console.WriteLine("Opening file: \"{0}\"", claim.TrackPath);
-                Stream track_stream = File.OpenRead(claim.TrackPath);
-                Console.WriteLine("Hashing track");
-                byte[] track_hash_bytes = hasher.ComputeHash(track_stream);
-                Console.WriteLine("Making String from hash");                
-                string track_hash = MakeString(track_hash_bytes);
-                Console.WriteLine("Track Hash: \"{0}\"", track_hash);
-                
-                // Look for rdf:about  uri_hash = HashUri(claim.TrackPath)
-                XmlNodeList result = docElement.SelectNodes("/rdf:RDF/Work/text()");
-                foreach(XmlNode n in result) {
-                    if(n.Value == track_hash) {
-                        return "found";
-                    }
-                }
-                
-                return "laksjflaskdjfls";
-            } catch (XmlException e) {
-                Console.WriteLine("error occured: " + e.Message);
-                return null; // TODO: This might not be what I want!
-            }
-		}
-		
-		private static string MakeString(byte[] characters)
-        {
-            UnicodeEncoding encoding = new UnicodeEncoding( );
-            string constructedString = encoding.GetString(characters);
+		private static string HexDigest(string file_path) {
+			Stream stream = new FileStream(file_path, FileMode.Open, FileAccess.Read);
 
-            return (constructedString);
-        }
+			SHA1 sha1_crypto = new SHA1CryptoServiceProvider();
+			byte[] digest = sha1_crypto.ComputeHash(stream);
+			string hex_digest = "";
+			foreach (byte i in digest) {
+				hex_digest = hex_digest + i.ToString("x2");
+			}
 		
-		// Return a license name based on the license URI using CCLicenseLib
-		private static string GetLicenseName(string rdf)
+			Console.WriteLine("File: \"{0}\" Hex Digest: \"{1}\"", file_path, hex_digest);
+//			SHA1Managed hasher = new SHA1Managed();
+//			string file_hash = Convert.ToBase64String(
+//									hasher.ComputeHash(File.OpenRead(file_path)));
+//			Console.WriteLine("File: \"{0}\" Hash: \"{1}\"", file_path, file_hash);
+			return hex_digest.ToUpper();
+		}
+		
+		private static bool LicenseInMetadata(string license_uri, string track_hash, string metadata)
 		{
-			return null;
+			XPathDocument doc = new XPathDocument(metadata);
+       		XPathNavigator navigator = doc.CreateNavigator();
+       		XPathExpression expression = navigator.Compile(
+       			String.Format("/rdf:RDF/r:Work[@rdf:about='urn:sha1:{0}']/r:license/@rdf:resource", track_hash));
+       		
+       		XmlNamespaceManager namespaces = new XmlNamespaceManager(new NameTable());
+       		namespaces.AddNamespace ("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+       		namespaces.AddNamespace ("dc", "http://purl.org/dc/elements/1.1/");
+       		namespaces.AddNamespace ("r", "http://web.resource.org/cc/");
+       		expression.SetContext(namespaces);
+       		
+       		XPathNodeIterator it = navigator.Select(expression);
+       		Console.WriteLine ("Found {0} license match(es) in metadata.", it.Count);
+       		while (it.MoveNext()) {
+       			XPathNavigator n = it.Current;
+       			if(n.Value == license_uri) {
+       				return true;
+       			}
+       		}
+       		return false;
 		}
 
-        // TODO: VERIFY_STRING is being indexed twice. This is bad.
-		// Extract the license URI from TCOP frame	
-		private static string ParseLicenseURI(string data)
+        // TODO: VERIFY_STRING is being searched twice.
+		private static string ParseLicenseUri(string data)
 		{
 		    int verify_index = (data.ToLower()).IndexOf(VERIFY_STRING);
 		    if(verify_index <= 0) {
@@ -159,8 +120,7 @@ namespace Banshee.Base
 			return data.Substring(http_index, (verify_index - http_index) - 1);
 		}
 		
-		// Extract the metadata URI from TCOP frame data
-		private static string ParseMetadataURI(string data)
+		private static string ParseMetadataUri(string data)
 		{
 			int verify_index = data.ToLower().IndexOf(VERIFY_STRING);
 			if(verify_index <= 0) {
@@ -168,6 +128,11 @@ namespace Banshee.Base
 			}
 
 			return data.Substring(verify_index + VERIFY_LENGTH, data.Length - (verify_index + VERIFY_LENGTH));
+		}
+				
+		private static string GetLicenseName(string rdf)
+		{
+			return null;
 		}
 	}
 }
