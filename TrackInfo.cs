@@ -58,11 +58,10 @@ namespace Banshee.Base
         protected string genre;
         protected string performer;
 
-		/* License Info */
         protected string license;       // License name; Empty if unverified
         protected string copyright;     // License and Verification URIs (TCOP)
-		protected string license_uri;   // License URI (WCOP)
-		protected string metadata_uri;  // Metadata verification URI (WOAF)
+        protected string license_uri;   // License URI (WCOP)
+        protected string metadata_uri;  // Metadata verification URI (WOAF)
 
         protected string asin;
         protected string label;
@@ -84,7 +83,7 @@ namespace Banshee.Base
         protected bool can_save_to_database;
         protected bool can_play = true;
         protected RemoteLookupStatus remote_lookup_status = RemoteLookupStatus.NoAttempt;
-        
+
         public Gtk.TreeIter PreviousTrack;
         public Gtk.TreeIter TreeIter;
         
@@ -263,48 +262,48 @@ namespace Banshee.Base
             } 
         }
 
-		public string License {
-			get {
-				return license;
-			}
-			
-			set {
-				license = value;
-				WriteUpdate();
-			}
-		}
+        public string License {
+            get {
+                return license;
+            }
 
-       	public string Copyright { 
+            set {
+                license = value;
+                WriteUpdate();
+            }
+        }
+
+        public string Copyright { 
             get { 
                 return copyright;
             }
-            
+
             set { 
                 copyright = value; 
                 WriteUpdate();
             } 
         }
-		
-       	public string LicenseUri { 
+
+        public string LicenseUri { 
             get { 
                 return license_uri;
             }
-            
+
             set { 
                 license_uri = value; 
                 WriteUpdate();
             } 
         }
-        
+
         public string MetadataUri {
-        	get {
-        		return metadata_uri;
-        	}
-        	
-        	set {
-        		metadata_uri = value;
-        		WriteUpdate();
-        	}
+            get {
+                return metadata_uri;
+            }
+
+            set {
+                metadata_uri = value;
+                WriteUpdate();
+            }
         }
 
         [BansheeTodo("Completely unused, should we even have this?")]

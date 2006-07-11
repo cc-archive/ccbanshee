@@ -53,7 +53,7 @@ namespace Banshee
     public class PlaylistView : TreeView
     {
         private enum ColumnId : int {
-	    	Track,
+            Track,
             Artist,
             Title,
             Album,
@@ -72,13 +72,12 @@ namespace Banshee
         Pixbuf nowPlayingPixbuf;
         Pixbuf songDrmedPixbuf;
         Pixbuf ripColumnPixbuf;
-        //Pixbuf licensesPixbuf;
 
         public TreeViewColumn RipColumn;
         public PlaylistColumn RatingColumn;
         public PlaylistColumn PlaysColumn;
-    	public PlaylistColumn LastPlayedColumn;
-    	public PlaylistColumn LicenseColumn;
+        public PlaylistColumn LastPlayedColumn;
+        public PlaylistColumn LicenseColumn;
         
         private class ColumnSorter : IComparer
         {
@@ -134,7 +133,7 @@ namespace Banshee
             columns.Add(LastPlayedColumn);
         	
         	LicenseColumn = new PlaylistColumn(this, 
-        		Catalog.GetString("License"), "License",
+                Catalog.GetString("License"), "License",
                 new TreeCellDataFunc(TrackCellLicense), 
                 new CellRendererText(),
                 9, (int)ColumnId.License);
@@ -214,7 +213,7 @@ namespace Banshee
                 new TreeIterCompareFunc(PlayCountTreeIterCompareFunc));
             model.SetSortFunc((int)ColumnId.LastPlayed, 
                 new TreeIterCompareFunc(LastPlayedTreeIterCompareFunc));
-        	model.SetSortFunc((int)ColumnId.License, 
+            model.SetSortFunc((int)ColumnId.License, 
                 new TreeIterCompareFunc(LicenseTreeIterCompareFunc));
         }    
 
@@ -437,8 +436,8 @@ namespace Banshee
                 toggle.Active = false;
             }
         }
-       
-		protected void TrackCellTrack(TreeViewColumn tree_column,
+
+        protected void TrackCellTrack(TreeViewColumn tree_column,
             CellRenderer cell, TreeModel tree_model, TreeIter iter)
         {
             TrackInfo ti = model.IterTrackInfo(iter);
@@ -489,7 +488,7 @@ namespace Banshee
             if(ti == null) {
                 return;
             }
-            
+
             SetRendererAttributes((CellRendererText)cell, ti.Genre, iter);
         }
 
@@ -500,7 +499,7 @@ namespace Banshee
             if(ti == null) {
                 return;
             }
-            
+
             SetRendererAttributes((CellRendererText)cell, ti.License, iter);
         }
 
@@ -555,10 +554,10 @@ namespace Banshee
             if(lastPlayed > DateTime.MinValue) {
                 disp = lastPlayed.ToString();
             }
-            
+
             SetRendererAttributes((CellRendererText)cell, String.Format("{0}", disp), iter);
         }
-              
+
         public void PlayPath(TreePath path)
         {
             model.PlayPath(path);

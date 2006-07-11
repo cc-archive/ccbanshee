@@ -116,6 +116,7 @@ namespace Banshee.Base
         public const string Organization      = "organization";
         public const string Copyright         = "copyright";
         public const string Contact           = "contact";
+        public const string License           = "license";
         public const string Performer         = "performer";
         public const string Duration          = "duration";
         public const string Codec             = "codec";
