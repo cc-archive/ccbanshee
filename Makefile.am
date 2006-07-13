@@ -160,6 +160,7 @@ ASSEMBLY_SOURCES = \
 	$(srcdir)/Branding.cs \
 	$(srcdir)/BansheeBranding.cs \
 	$(srcdir)/CreativeCommons.cs \
+	$(srcdir)/Base32.cs \
 	$(srcdir)/ComponentInitializer.cs \
 	$(srcdir)/PowerManagement.cs 
 
