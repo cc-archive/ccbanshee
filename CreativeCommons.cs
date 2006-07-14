@@ -119,48 +119,65 @@ namespace Banshee.Base
             return data.Substring(verify_index + VERIFY_LENGTH, data.Length - (verify_index + VERIFY_LENGTH));
         }
         		
-        private static string GetLicenseName(string rdf)
+        private static string GetLicenseName(string license_uri)
         {
-            return "Valid";
+            string license_name;
+            switch(license_uri.ToLower()) {
+                case Licenses.Attribution:
+                    license_name = "Attribution";
+                    break;
+                case Licenses.Attribution_NoDerivs:
+                    license_name = "Attribution-NoDerivs";
+                    break;
+                case Licenses.Attribution_NonCommercial_NoDerivs:
+                    license_name = "Attribution-NonCommercial-NoDerivs";
+                    break;
+                case Licenses.Attribution_NonCommercial:
+                    license_name = "Attribution-NonCommercial";
+                    break;
+                case Licenses.Attribution_NonCommercial_ShareAlike:
+                    license_name = "Attribution-NonCommercial-ShareAlike";
+                    break;
+                case Licenses.Attribution_ShareAlike:
+                    license_name = "Attribution-ShareAlike";
+                    break;
+                case Licenses.NoDerivs:
+                    license_name = "NoDerivs";
+                    break;
+                case Licenses.NoDerivs_NonCommercial:
+                    license_name = "NoDerivs-NonCommercial";
+                    break;
+                case Licenses.NonCommercial:
+                    license_name = "NonCommercial";
+                    break;
+                case Licenses.NonCommercial_ShareAlike:
+                    license_name = "NonCommercial-ShareAlike";
+                    break;
+                case Licenses.ShareAlike:
+                    license_name = "ShareAlike";
+                    break;
+                default:
+                    license_name = "Valid";
+                    break;
+            }
+            return license_name;
         }
 	}
 	
-	public sealed class LicenseUri 
-    {
-        public const string Title             = "title";
-        public const string Artist            = "artist";
-        public const string Album             = "album";
-        public const string Date              = "date";
-        public const string Genre             = "genre";
-        public const string Comment           = "comment";
-        public const string TrackNumber       = "track-number";
-        public const string TrackCount        = "track-count";
-        public const string AlbumVolumeNumber = "album-disc-number";
-        public const string AlbumVolumeCount  = "album-disc-count";
-        public const string Location          = "location";
-        public const string Description       = "description";
-        public const string Version           = "version";
-        public const string Isrc              = "isrc";
-        public const string Organization      = "organization";
-        public const string Copyright         = "copyright";
-        public const string Contact           = "contact";
-        public const string License           = "license";
-        public const string Performer         = "performer";
-        public const string Duration          = "duration";
-        public const string Codec             = "codec";
-        public const string VideoCodec        = "video-codec";
-        public const string AudioCodec        = "audio-codec";
-        public const string Bitrate           = "bitrate";
-        public const string NominalBitrate    = "nominal-bitrate";
-        public const string MinimumBitrate    = "minimum-bitrate";
-        public const string MaximumBitrate    = "maximum-bitrate";
-        public const string Serial            = "serial";
-        public const string Encoder           = "encoder";
-        public const string EncoderVersion    = "encoder-version";
-        public const string TrackGain         = "replaygain-track-gain";
-        public const string TrackPeak         = "replaygain-track-peak";
-        public const string AlbumGain         = "replaygain-album-gain";
-        public const string AlbumPeak         = "replaygain-album-peak";
-        public const string StreamType        = "stream-type";
+	public sealed class Licenses
+	{
+	    // Version 2.5 Licenses
+        public const string Attribution                             = "http://creativecommons.org/licenses/by/2.5/";
+        public const string Attribution_NoDerivs                    = "http://creativecommons.org/licenses/by-nd/2.5/";
+        public const string Attribution_NonCommercial_NoDerivs      = "http://creativecommons.org/licenses/by-nc-nd/2.5/";
+        public const string Attribution_NonCommercial               = "http://creativecommons.org/licenses/by-nc/2.5/";
+        public const string Attribution_NonCommercial_ShareAlike    = "http://creativecommons.org/licenses/by-nc-sa/2.5/";
+        public const string Attribution_ShareAlike                  = "http://creativecommons.org/licenses/by-sa/2.5/";
+        // Version 1.0 Licenses
+        public const string NoDerivs                                = "http://creativecommons.org/licenses/nd/1.0/";
+        public const string NoDerivs_NonCommercial                  = "http://creativecommons.org/licenses/nd-nc/1.0/";
+        public const string NonCommercial                           = "http://creativecommons.org/licenses/nc/1.0/";
+        public const string NonCommercial_ShareAlike                = "http://creativecommons.org/licenses/nc-sa/1.0/";
+        public const string ShareAlike                              = "http://creativecommons.org/licenses/sa/1.0/";
     }
 }
