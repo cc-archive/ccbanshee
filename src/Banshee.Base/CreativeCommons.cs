@@ -123,38 +123,38 @@ namespace Banshee.Base
         {
             string license_name;
             switch(license_uri.ToLower()) {
-                case Licenses.Attribution:
-                    license_name = "Attribution";
+                case LicenseUri.Attribution:
+                    license_name = LicenseName.Attribution;
                     break;
-                case Licenses.Attribution_NoDerivs:
-                    license_name = "Attribution-NoDerivs";
+                case LicenseUri.Attribution_NoDerivs:
+                    license_name = LicenseName.Attribution_NoDerivs;
                     break;
-                case Licenses.Attribution_NonCommercial_NoDerivs:
-                    license_name = "Attribution-NonCommercial-NoDerivs";
+                case LicenseUri.Attribution_NonCommercial_NoDerivs:
+                    license_name = LicenseName.Attribution_NonCommercial_NoDerivs;
                     break;
-                case Licenses.Attribution_NonCommercial:
-                    license_name = "Attribution-NonCommercial";
+                case LicenseUri.Attribution_NonCommercial:
+                    license_name = LicenseName.Attribution_NonCommercial;
                     break;
-                case Licenses.Attribution_NonCommercial_ShareAlike:
-                    license_name = "Attribution-NonCommercial-ShareAlike";
+                case LicenseUri.Attribution_NonCommercial_ShareAlike:
+                    license_name = LicenseName.Attribution_NonCommercial_ShareAlike;
                     break;
-                case Licenses.Attribution_ShareAlike:
-                    license_name = "Attribution-ShareAlike";
+                case LicenseUri.Attribution_ShareAlike:
+                    license_name = LicenseName.Attribution_ShareAlike;
                     break;
-                case Licenses.NoDerivs:
-                    license_name = "NoDerivs";
+                case LicenseUri.NoDerivs:
+                    license_name = LicenseName.NoDerivs;
                     break;
-                case Licenses.NoDerivs_NonCommercial:
-                    license_name = "NoDerivs-NonCommercial";
+                case LicenseUri.NoDerivs_NonCommercial:
+                    license_name = LicenseName.NoDerivs_NonCommercial;
                     break;
-                case Licenses.NonCommercial:
-                    license_name = "NonCommercial";
+                case LicenseUri.NonCommercial:
+                    license_name = LicenseName.NonCommercial;
                     break;
-                case Licenses.NonCommercial_ShareAlike:
-                    license_name = "NonCommercial-ShareAlike";
+                case LicenseUri.NonCommercial_ShareAlike:
+                    license_name = LicenseName.NonCommercial_ShareAlike;
                     break;
-                case Licenses.ShareAlike:
-                    license_name = "ShareAlike";
+                case LicenseUri.ShareAlike:
+                    license_name = LicenseName.ShareAlike;
                     break;
                 default:
                     license_name = "Valid";
@@ -164,7 +164,7 @@ namespace Banshee.Base
         }
 	}
 	
-	public sealed class Licenses
+	public sealed class LicenseUri
 	{
 	    // Version 2.5 Licenses
         public const string Attribution                             = "http://creativecommons.org/licenses/by/2.5/";
@@ -179,5 +179,37 @@ namespace Banshee.Base
         public const string NonCommercial                           = "http://creativecommons.org/licenses/nc/1.0/";
         public const string NonCommercial_ShareAlike                = "http://creativecommons.org/licenses/nc-sa/1.0/";
         public const string ShareAlike                              = "http://creativecommons.org/licenses/sa/1.0/";
+    }
+    
+    // TODO: Should licenses be stored by name or some sort of ID number in the database?
+//    public enum Licenses {
+//        Attribution,
+//        Attribution_NoDerivs,
+//        Attribution_NonCommercial_NoDerivs,
+//        Attribution_NonCommercial,
+//        Attribution_NonCommercial_ShareAlike,
+//        Attribution_ShareAlike,
+//        NoDerivs,
+//        NoDerivs_NonCommercial,
+//        NonCommercial,
+//        NonCommercial_ShareAlike,
+//        ShareAlike
+//    }
+    
+    public sealed class LicenseName
+	{
+	    // Version 2.5 Licenses
+        public const string Attribution                             = "Attribution";
+        public const string Attribution_NoDerivs                    = "Attribution-NoDerivs";
+        public const string Attribution_NonCommercial_NoDerivs      = "Attribution-NonCommercial-NoDerivs";
+        public const string Attribution_NonCommercial               = "Attribution-NonCommercial";
+        public const string Attribution_NonCommercial_ShareAlike    = "Attribution-NonCommercial-ShareAlike";
+        public const string Attribution_ShareAlike                  = "Attribution-ShareAlike";
+        // Version 1.0 Licenses
+        public const string NoDerivs                                = "NoDerivs";
+        public const string NoDerivs_NonCommercial                  = "NoDerivs-NonCommercial";
+        public const string NonCommercial                           = "NonCommercial";
+        public const string NonCommercial_ShareAlike                = "NonCommercial-ShareAlike";
+        public const string ShareAlike                              = "ShareAlike";
     }
 }
