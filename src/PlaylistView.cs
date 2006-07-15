@@ -63,7 +63,7 @@ namespace Banshee
             Rating,
             PlayCount,
             LastPlayed,
-           	License
+            License
         };
             
         private ArrayList columns;
@@ -140,7 +140,6 @@ namespace Banshee
                 Catalog.GetString("License"), "License",
                 new TreeCellDataFunc(TrackCellLicense),
                 new LicenseRenderer(),
-                //new CellRendererText(),
                 10, (int)ColumnId.License);
             columns.Add(LicenseColumn);
             
@@ -307,8 +306,8 @@ namespace Banshee
         public int LicenseTreeIterCompareFunc(TreeModel _model, TreeIter a, 
             TreeIter b)
         {
-            // TODO: Sort: Public Domain, Creative Commons, All Rights Rreserved	
-            return 0;
+            return LongFieldCompare(model.IterTrackInfo(a).License, 
+                model.IterTrackInfo(b).License);
         }  
         
         public int YearTreeIterCompareFunc(TreeModel _model, TreeIter a,
@@ -515,7 +514,6 @@ namespace Banshee
             }
             
             ((LicenseRenderer)cell).Track = ti;
-            // SetRendererAttributes((CellRendererText)cell, ti.License, iter);
         }
 
         protected void TrackCellYear(TreeViewColumn tree_column,
