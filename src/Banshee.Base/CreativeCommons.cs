@@ -20,47 +20,67 @@ namespace Banshee.Base
         private const string HTTP_STRING = "http://";
         private const string VERIFY_STRING = "verify at ";
         private const int VERIFY_LENGTH = 10;
-
+        
         public static void VerifyLicense(TrackInfo track)
         {
-            string license_uri;
-            string metadata_uri;
-
             try {
-                ParseClaim(track, out license_uri, out metadata_uri);
-            } catch(ArgumentException e) {
+                /* Check for a full license claim */
+                CheckLicenseClaim(track);
+                
+                /* Parse RDF metadata from verification URL in license claim */
+                RDFParser metadata_parser = new RDFParser(track.MetadataUri, true);
+                
+                /* Look for license in RDF metadata */
+                string license_name = FindLicenseInMetadata(track.LicenseUri,
+                                                            HashData(track.Uri.AbsolutePath),
+                                                            metadata_parser.GetRDFAsString());
+                
+                /* Set license name */
+                track.License = license_name;
+            } catch(Exception e) {
+                // TODO: Integrate with LogCore
                 Console.WriteLine(e);
-                return;    
-            }
-
-            RDFParser metadata_parser = new RDFParser(metadata_uri, true);
-            if(LicenseInMetadata(license_uri,
-                                 HashData(track.Uri.AbsolutePath),
-                                 metadata_parser.GetRDFAsString())) {
-                SetLicense(track, license_uri);
             }
         }
-
-        private static void SetLicense(TrackInfo track, string license_uri) {
-            track.License = GetLicenseName(license_uri);
-        }
-
-        private static void ParseClaim(TrackInfo track, out string license_uri, out string metadata_uri)
+        
+        private static void CheckLicenseClaim(TrackInfo track)
         {
-            /* WCOP/WOAF and TCOP parsing */
-            if((track.LicenseUri != null) &&
-               (track.MetadataUri != null)) {
-                license_uri = track.LicenseUri;
-                metadata_uri = track.MetadataUri;
-            } else if(track.Copyright != null) {
-                license_uri = ParseLicenseUri(track.Copyright);
-                metadata_uri = ParseMetadataUri(track.Copyright);
+            if(track.Copyright == null) {
+                if(track.LicenseUri == null || track.MetadataUri == null) {
+                    throw new Exception("Track contains no claim.");
+                }
             } else {
-                throw new ArgumentException("No license claim was made.");
+                track.LicenseUri = ParseLicenseUri(track.Copyright);
+                track.MetadataUri = ParseMetadataUri(track.Copyright);
             }
         }
+        
+        // TODO: VERIFY_STRING is being searched twice.
+        private static string ParseLicenseUri(string data)
+        {
+            int verify_index = (data.ToLower()).IndexOf(VERIFY_STRING);
+            if(verify_index <= 0) {
+                throw new Exception("No metadata was found in Copyright tag while parsing license URL.");    
+            }
+            
+            int http_index = (data.ToLower()).LastIndexOf(HTTP_STRING, verify_index);
+            if(http_index <= 0) {
+                throw new Exception("No license was found in Copyright tag.");
+            }
+            
+            return data.Substring(http_index, (verify_index - http_index) - 1);
+        }
 
-        // TODO: Buffer hashing and read base32.py for more info on optimization
+        private static string ParseMetadataUri(string data)
+        {
+            int verify_index = data.ToLower().IndexOf(VERIFY_STRING);
+            if(verify_index <= 0) {
+                throw new Exception("No metadata was found in Copyright tag at parsing metadata url");
+            }
+
+            return data.Substring(verify_index + VERIFY_LENGTH, data.Length - (verify_index + VERIFY_LENGTH));
+        }
+        
         private static string HashData(string file_path) {
             SHA1Managed hasher = new SHA1Managed();
             Base32 b32 = new Base32(hasher.ComputeHash(File.OpenRead(file_path)));
@@ -69,7 +89,7 @@ namespace Banshee.Base
             return file_hash;
         }
 
-        private static bool LicenseInMetadata(string license_uri, string track_hash, string metadata)
+        private static string FindLicenseInMetadata(string license_uri, string track_hash, string metadata)
         {
             XPathDocument doc = new XPathDocument(new StringReader(metadata));
        	    XPathNavigator navigator = doc.CreateNavigator();
@@ -87,38 +107,12 @@ namespace Banshee.Base
        	    while (it.MoveNext()) {
        	        XPathNavigator n = it.Current;
        	        if(n.Value == license_uri) {
-       	            return true;
+       	            return GetLicenseName(license_uri);
        	        }
        	    }
-       	    return false;
+       	    throw new Exception("License was not found in RDF metadata.");
         }
-
-        // TODO: VERIFY_STRING is being searched twice.
-        private static string ParseLicenseUri(string data)
-        {
-            int verify_index = (data.ToLower()).IndexOf(VERIFY_STRING);
-            if(verify_index <= 0) {
-                throw new ArgumentException("No metadata was found in Copyright tag at parsing license url");    
-            }
-            
-            int http_index = (data.ToLower()).LastIndexOf(HTTP_STRING, verify_index);
-            if(http_index <= 0) {
-                throw new ArgumentException("No license was found in Copyright tag");
-            }
-            
-            return data.Substring(http_index, (verify_index - http_index) - 1);
-        }
-
-        private static string ParseMetadataUri(string data)
-        {
-            int verify_index = data.ToLower().IndexOf(VERIFY_STRING);
-            if(verify_index <= 0) {
-                throw new ArgumentException("No metadata was found in Copyright tag at parsing metadata url");
-            }
-
-            return data.Substring(verify_index + VERIFY_LENGTH, data.Length - (verify_index + VERIFY_LENGTH));
-        }
-        		
+        
         private static string GetLicenseName(string license_uri)
         {
             string license_name;
@@ -157,8 +151,7 @@ namespace Banshee.Base
                     license_name = LicenseName.ShareAlike;
                     break;
                 default:
-                    license_name = "Valid";
-                    break;
+                    throw new ArgumentException("Invalid license URL.");
             }
             return license_name;
         }
@@ -180,21 +173,6 @@ namespace Banshee.Base
         public const string NonCommercial_ShareAlike                = "http://creativecommons.org/licenses/nc-sa/1.0/";
         public const string ShareAlike                              = "http://creativecommons.org/licenses/sa/1.0/";
     }
-    
-    // TODO: Should licenses be stored by name or some sort of ID number in the database?
-//    public enum Licenses {
-//        Attribution,
-//        Attribution_NoDerivs,
-//        Attribution_NonCommercial_NoDerivs,
-//        Attribution_NonCommercial,
-//        Attribution_NonCommercial_ShareAlike,
-//        Attribution_ShareAlike,
-//        NoDerivs,
-//        NoDerivs_NonCommercial,
-//        NonCommercial,
-//        NonCommercial_ShareAlike,
-//        ShareAlike
-//    }
     
     public sealed class LicenseName
 	{

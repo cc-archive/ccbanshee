@@ -88,7 +88,7 @@ namespace Banshee.Base
                         track.MimeType = (string)tag.Value;
                         break;
                     /* default:
-                    	Console.WriteLine("=== TAG UNMERGED ===");
+                    	Console.WriteLine("Unmerged Tag:");
                     	Console.WriteLine(tag.ToString());
                     	break; */
                 }
