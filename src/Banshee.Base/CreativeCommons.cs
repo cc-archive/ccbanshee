@@ -11,63 +11,91 @@ using System.Xml;
 using System.Xml.XPath;
 using System.Text;
 using System.Security.Cryptography;
-using CCLicenseLib.Utilities;
+using CreativeCommons;
 
 namespace Banshee.Base
 {
+    public class LicenseParseException : ApplicationException
+    {
+        public LicenseParseException()
+        {
+        }
+        
+        public LicenseParseException(string m) : base(m)
+        {
+        }
+    }
+    
     public static class CreativeCommons
     {
+        private const string LICENSES_STRING = "licenses/";
+        private const int LICENSES_LENGTH = 9;
+        
         private const string HTTP_STRING = "http://";
+        
         private const string VERIFY_STRING = "verify at ";
         private const int VERIFY_LENGTH = 10;
         
         public static void VerifyLicense(TrackInfo track)
         {
             try {
-                /* Check for a full license claim */
-                CheckLicenseClaim(track);
-                
-                /* Parse RDF metadata from verification URL in license claim */
-                RDFParser metadata_parser = new RDFParser(track.MetadataUri, true);
-                
-                /* Look for license in RDF metadata */
-                string license_name = FindLicenseInMetadata(track.LicenseUri,
-                                                            HashData(track.Uri.AbsolutePath),
-                                                            metadata_parser.GetRDFAsString());
-                
-                /* Set license name */
-                track.License = license_name;
-            } catch(Exception e) {
-                // TODO: Integrate with LogCore
+                /* Not complete license claim */
+                if(!FullLicenseClaim(track))
+                    return;
+            
+                /* Verify license */
+                string verified_license_uri = null;
+                if(Verifier.VerifyLicense (track.Uri.AbsolutePath,
+                                           track.LicenseUri, new Uri (track.MetadataUri)))
+                    verified_license_uri = track.LicenseUri;
+                else
+                    return;
+
+                /* Store license attribute string in track metadata */
+                track.License = GetLicenseAttributes(verified_license_uri);
+            } catch(LicenseParseException e) {
                 Console.WriteLine(e);
+                return;
             }
         }
         
-        private static void CheckLicenseClaim(TrackInfo track)
+        private static bool FullLicenseClaim(TrackInfo track)
         {
             if(track.Copyright == null) {
                 if(track.LicenseUri == null || track.MetadataUri == null) {
-                    throw new Exception("Track contains no claim.");
+                    return false;
                 }
             } else {
                 track.LicenseUri = ParseLicenseUri(track.Copyright);
                 track.MetadataUri = ParseMetadataUri(track.Copyright);
             }
+            return true;
         }
         
-        // TODO: VERIFY_STRING is being searched twice.
+        private static string GetLicenseAttributes(string data)
+        {
+            int licenses_index = data.ToLower().IndexOf(LICENSES_STRING);
+            if(licenses_index <= 0) {
+                throw new LicenseParseException("No attributes were found in Copyright tag.");
+            }
+            
+            int attribute_index = licenses_index + LICENSES_LENGTH;
+            return data.Substring(attribute_index, data.IndexOf('/', attribute_index) - attribute_index);
+        }
+        
         private static string ParseLicenseUri(string data)
         {
             int verify_index = (data.ToLower()).IndexOf(VERIFY_STRING);
             if(verify_index <= 0) {
-                throw new Exception("No metadata was found in Copyright tag while parsing license URL.");    
+                throw new LicenseParseException("No metadata was found in Copyright tag while parsing license URL.");    
             }
             
             int http_index = (data.ToLower()).LastIndexOf(HTTP_STRING, verify_index);
             if(http_index <= 0) {
-                throw new Exception("No license was found in Copyright tag.");
+                throw new LicenseParseException("No license was found in Copyright tag.");
             }
             
+            /* The -1 is because LastIndexOf adds 1 for arg test */
             return data.Substring(http_index, (verify_index - http_index) - 1);
         }
 
@@ -75,119 +103,11 @@ namespace Banshee.Base
         {
             int verify_index = data.ToLower().IndexOf(VERIFY_STRING);
             if(verify_index <= 0) {
-                throw new Exception("No metadata was found in Copyright tag at parsing metadata url");
+                throw new LicenseParseException("No metadata was found in Copyright tag at parsing metadata URL.");
             }
-
-            return data.Substring(verify_index + VERIFY_LENGTH, data.Length - (verify_index + VERIFY_LENGTH));
-        }
-        
-        private static string HashData(string file_path) {
-            SHA1Managed hasher = new SHA1Managed();
-            Base32 b32 = new Base32(hasher.ComputeHash(File.OpenRead(file_path)));
-            string file_hash = b32.ToString();
-            Console.WriteLine("File: \"{0}\" Hash: \"{1}\"", file_path, file_hash);
-            return file_hash;
-        }
-
-        private static string FindLicenseInMetadata(string license_uri, string track_hash, string metadata)
-        {
-            XPathDocument doc = new XPathDocument(new StringReader(metadata));
-       	    XPathNavigator navigator = doc.CreateNavigator();
-       	    XPathExpression expression = navigator.Compile(
-                String.Format("/rdf:RDF/r:Work[@rdf:about='urn:sha1:{0}']/r:license/@rdf:resource", track_hash));
-
-       	    XmlNamespaceManager namespaces = new XmlNamespaceManager(new NameTable());
-       	    namespaces.AddNamespace ("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-       	    namespaces.AddNamespace ("dc", "http://purl.org/dc/elements/1.1/");
-       	    namespaces.AddNamespace ("r", "http://web.resource.org/cc/");
-       	    expression.SetContext(namespaces);
-
-       	    XPathNodeIterator it = navigator.Select(expression);
-       	    Console.WriteLine("Found {0} license match(es) in metadata.", it.Count);
-       	    while (it.MoveNext()) {
-       	        XPathNavigator n = it.Current;
-       	        if(n.Value == license_uri) {
-       	            return GetLicenseName(license_uri);
-       	        }
-       	    }
-       	    throw new Exception("License was not found in RDF metadata.");
-        }
-        
-        private static string GetLicenseName(string license_uri)
-        {
-            string license_name;
-            switch(license_uri.ToLower()) {
-                case LicenseUri.Attribution:
-                    license_name = LicenseName.Attribution;
-                    break;
-                case LicenseUri.Attribution_NoDerivs:
-                    license_name = LicenseName.Attribution_NoDerivs;
-                    break;
-                case LicenseUri.Attribution_NonCommercial_NoDerivs:
-                    license_name = LicenseName.Attribution_NonCommercial_NoDerivs;
-                    break;
-                case LicenseUri.Attribution_NonCommercial:
-                    license_name = LicenseName.Attribution_NonCommercial;
-                    break;
-                case LicenseUri.Attribution_NonCommercial_ShareAlike:
-                    license_name = LicenseName.Attribution_NonCommercial_ShareAlike;
-                    break;
-                case LicenseUri.Attribution_ShareAlike:
-                    license_name = LicenseName.Attribution_ShareAlike;
-                    break;
-                case LicenseUri.NoDerivs:
-                    license_name = LicenseName.NoDerivs;
-                    break;
-                case LicenseUri.NoDerivs_NonCommercial:
-                    license_name = LicenseName.NoDerivs_NonCommercial;
-                    break;
-                case LicenseUri.NonCommercial:
-                    license_name = LicenseName.NonCommercial;
-                    break;
-                case LicenseUri.NonCommercial_ShareAlike:
-                    license_name = LicenseName.NonCommercial_ShareAlike;
-                    break;
-                case LicenseUri.ShareAlike:
-                    license_name = LicenseName.ShareAlike;
-                    break;
-                default:
-                    throw new ArgumentException("Invalid license URL.");
-            }
-            return license_name;
+            
+            int metadata_index = verify_index + VERIFY_LENGTH;
+            return data.Substring(metadata_index, data.Length - (metadata_index));
         }
 	}
-	
-	public sealed class LicenseUri
-	{
-	    // Version 2.5 Licenses
-        public const string Attribution                             = "http://creativecommons.org/licenses/by/2.5/";
-        public const string Attribution_NoDerivs                    = "http://creativecommons.org/licenses/by-nd/2.5/";
-        public const string Attribution_NonCommercial_NoDerivs      = "http://creativecommons.org/licenses/by-nc-nd/2.5/";
-        public const string Attribution_NonCommercial               = "http://creativecommons.org/licenses/by-nc/2.5/";
-        public const string Attribution_NonCommercial_ShareAlike    = "http://creativecommons.org/licenses/by-nc-sa/2.5/";
-        public const string Attribution_ShareAlike                  = "http://creativecommons.org/licenses/by-sa/2.5/";
-        // Version 1.0 Licenses
-        public const string NoDerivs                                = "http://creativecommons.org/licenses/nd/1.0/";
-        public const string NoDerivs_NonCommercial                  = "http://creativecommons.org/licenses/nd-nc/1.0/";
-        public const string NonCommercial                           = "http://creativecommons.org/licenses/nc/1.0/";
-        public const string NonCommercial_ShareAlike                = "http://creativecommons.org/licenses/nc-sa/1.0/";
-        public const string ShareAlike                              = "http://creativecommons.org/licenses/sa/1.0/";
-    }
-    
-    public sealed class LicenseName
-	{
-	    // Version 2.5 Licenses
-        public const string Attribution                             = "Attribution";
-        public const string Attribution_NoDerivs                    = "Attribution-NoDerivs";
-        public const string Attribution_NonCommercial_NoDerivs      = "Attribution-NonCommercial-NoDerivs";
-        public const string Attribution_NonCommercial               = "Attribution-NonCommercial";
-        public const string Attribution_NonCommercial_ShareAlike    = "Attribution-NonCommercial-ShareAlike";
-        public const string Attribution_ShareAlike                  = "Attribution-ShareAlike";
-        // Version 1.0 Licenses
-        public const string NoDerivs                                = "NoDerivs";
-        public const string NoDerivs_NonCommercial                  = "NoDerivs-NonCommercial";
-        public const string NonCommercial                           = "NonCommercial";
-        public const string NonCommercial_ShareAlike                = "NonCommercial-ShareAlike";
-        public const string ShareAlike                              = "ShareAlike";
-    }
 }

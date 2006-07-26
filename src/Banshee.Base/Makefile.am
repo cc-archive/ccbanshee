@@ -59,7 +59,7 @@ GUI_SOURCES = \
 	$(srcdir)/Gui/SeekDialog.cs \
 	$(srcdir)/Gui/ErrorListDialog.cs \
 	$(srcdir)/Gui/SplashScreen.cs \
-	$(srcdir)/Gui/PreferencesDialog.cs
+	$(srcdir)/Gui/PreferencesDialog.cs 
 
 AUDIOCD_SOURCES = \
 	$(srcdir)/AudioCd/AudioCdCore.cs \
@@ -96,7 +96,8 @@ PLUGINS_SOURCES = \
 	$(srcdir)/Plugins/PluginFactory.cs
 
 MEDIAENGINE_SOURCES = \
-	$(srcdir)/MediaEngine/PlayerEngine.cs
+	$(srcdir)/MediaEngine/PlayerEngine.cs \
+	$(srcdir)/MediaEngine/IEqualizer.cs
 
 ASSEMBLY_SOURCES = \
     $(AUDIOCD_SOURCES) \
@@ -160,12 +161,11 @@ ASSEMBLY_SOURCES = \
 	$(srcdir)/Branding.cs \
 	$(srcdir)/BansheeBranding.cs \
 	$(srcdir)/CreativeCommons.cs \
-	$(srcdir)/Base32.cs \
 	$(srcdir)/ComponentInitializer.cs \
 	$(srcdir)/PowerManagement.cs 
 
 $(ASSEMBLY): $(ASSEMBLY_SOURCES) $(srcdir)/../../data/UIManagerLayout.xml
-	$(MCS) $(MCS_FLAGS) -target:library -r:System.Data -r:Mono.Data.SqliteClient -r:$(top_builddir)/entagged-sharp/entagged-sharp.dll -r:$(top_builddir)/cclicenselib/CCLicenseLib.dll -r:$(top_builddir)/src/Banshee.Widgets/Banshee.Widgets.dll -r:$(top_builddir)/burn-sharp/burn-sharp.dll -r:$(top_builddir)/src/MusicBrainz/MusicBrainz.dll -r:$(top_builddir)/hal-sharp/hal-sharp.dll $(GTKSHARP_LIBS) $(DBUSSHARP_LIBS) -r:Mono.Posix $(DAAPSHARP_LIBS) -resource:$(srcdir)/../../data/UIManagerLayout.xml,UIManagerLayout.xml -resource:$(srcdir)/../../data/images/splash.png,splash.png -out:$@ $(ASSEMBLY_SOURCES) $(bansheebase_generated_sources)
+	$(MCS) $(MCS_FLAGS) -target:library -r:System.Data -r:Mono.Data.SqliteClient -r:$(top_builddir)/entagged-sharp/entagged-sharp.dll -r:$(top_builddir)/cc-sharp/cc-sharp.dll -r:$(top_builddir)/src/Banshee.Widgets/Banshee.Widgets.dll -r:$(top_builddir)/burn-sharp/burn-sharp.dll -r:$(top_builddir)/src/MusicBrainz/MusicBrainz.dll -r:$(top_builddir)/hal-sharp/hal-sharp.dll $(GTKSHARP_LIBS) $(DBUSSHARP_LIBS) -r:Mono.Posix $(DAAPSHARP_LIBS) -resource:$(srcdir)/../../data/UIManagerLayout.xml,UIManagerLayout.xml -resource:$(srcdir)/../../data/images/splash.png,splash.png -out:$@ $(ASSEMBLY_SOURCES) $(bansheebase_generated_sources)
 
 EXTRA_DIST = $(ASSEMBLY_SOURCES) $(bansheebase_sources_in) $(ASSEMBLY).config.in 
 CLEANFILES = $(ASSEMBLY) *.dll *.exe

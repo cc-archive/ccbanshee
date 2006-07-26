@@ -108,7 +108,10 @@ banshee_resources = \
 	data/images/cc-no-derivs.png \
 	data/images/cc-noncommercial.png \
 	data/images/cc-public-domain.png \
+	data/images/cc-sampling-plus.png \
+	data/images/cc-sampling.png \
 	data/images/cc-share-alike.png \
+	data/images/cc-standard.png \
 	data/images/encode-action-24.png
 
 banshee_resources_build = $(foreach res,$(banshee_resources), $(addprefix -resource:,$(srcdir)/../$(res)),$(notdir $(res)))

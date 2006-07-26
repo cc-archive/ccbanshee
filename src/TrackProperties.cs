@@ -258,11 +258,13 @@ namespace Banshee
                     Channels.Text = af.Channels.ToString();
                     MimeType.Text = af.MimeType;
                     ExtraInfo.Text = af.EncodingType;
-                    if(track.Track.License != null) {
-                        License.Text = String.Format("{0}; {1}", track.Track.License, track.Track.LicenseUri);
-                    } else {
-                        throw new Exception("No license.");
-                    }
+
+                    if(track.Track.License != null)
+                        License.Text = String.Format("{0}", track.Track.LicenseUri);
+                    else if(track.Track.LicenseUri != null)
+                        License.Text = String.Format("Invalid claim: {0}", track.Track.LicenseUri);
+                    else
+                        License.Text = "None";
                 } catch(Exception e) {
                     BitRate.Text = Catalog.GetString("Unknown");
                     SampleRate.Text = Catalog.GetString("Unknown");

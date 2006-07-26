@@ -27,6 +27,7 @@
  */
  
 using System;
+using System.Diagnostics;
 
 namespace Banshee.Base
 {
@@ -87,10 +88,6 @@ namespace Banshee.Base
                     case CommonTags.StreamType:
                         track.MimeType = (string)tag.Value;
                         break;
-                    /* default:
-                    	Console.WriteLine("Unmerged Tag:");
-                    	Console.WriteLine(tag.ToString());
-                    	break; */
                 }
             } catch {
             }

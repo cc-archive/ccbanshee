@@ -66,12 +66,15 @@ EXTRA_DIST = \
 	cd-action-burn-24.png \
 	cd-action-burn-32.png \
 	cd-action-burn-48.png \
+	encode-action-24.png \
 	cc-attribution.png \
 	cc-no-derivs.png \
 	cc-noncommercial.png \
 	cc-public-domain.png \
+	cc-sampling-plus.png \
+	cc-sampling.png \
 	cc-share-alike.png \
-	encode-action-24.png \
+	cc-standard.png \
 	splash.png
 
 generate-resource-list:
