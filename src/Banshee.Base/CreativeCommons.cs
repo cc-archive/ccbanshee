@@ -47,7 +47,7 @@ namespace Banshee.Base
                 string verified_license_uri = null;
                 if(Verifier.VerifyLicense (track.LicenseUri, track.Uri.AbsolutePath,
                                            new Uri (track.MetadataUri)))
-                    string verified_license_uri = track.LicenseUri;
+                    verified_license_uri = track.LicenseUri;
                 else
                     return;
 
