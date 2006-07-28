@@ -20,7 +20,7 @@ BANSHEE_CDROM_SOURCES = \
 BANSHEE_CDROM_GUI_SOURCES = \
 	$(srcdir)/Banshee.Cdrom.Gui/DriveComboBox.cs \
 	$(srcdir)/Banshee.Cdrom.Gui/RecorderSpeedComboBox.cs
-	
+
 BANSHEE_CDROM_NAUTILUS_SOURCES = \
 	$(srcdir)/Banshee.Cdrom.Nautilus/NautilusDriveFactory.cs \
 	$(srcdir)/Banshee.Cdrom.Nautilus/NautilusDrive.cs \
@@ -33,7 +33,7 @@ BANSHEE_CDROM_ISO_SOURCES = \
 BANSHEE_CDROM_ISO_MKISOFS_SOURCES = \
 	$(srcdir)/Banshee.Cdrom.Iso.Mkisofs/MkisofsProcess.cs \
 	$(srcdir)/Banshee.Cdrom.Iso.Mkisofs/MkisofsImageCreator.cs
-	
+
 BANSHEE_BURNER_SOURCES = \
 	$(srcdir)/Banshee.Burner/BurnerCore.cs \
 	$(srcdir)/Banshee.Burner/BurnerSource.cs \
@@ -45,6 +45,22 @@ BANSHEE_BURNER_SOURCES = \
 	$(srcdir)/Banshee.Burner/BurnerSessionPreparer.cs \
 	$(srcdir)/Banshee.Burner/BurnerSessionRecorder.cs
 
+BANSHEE_EQUALIZER_SOURCES = \
+	$(srcdir)/Banshee.Equalizer/EqualizerManager.cs \
+	$(srcdir)/Banshee.Equalizer/EqualizerSetting.cs
+
+BANSHEE_EQUALIZER_GUI_SOURCES = \
+	$(srcdir)/Banshee.Equalizer.Gui/EqualizerView.cs \
+	$(srcdir)/Banshee.Equalizer.Gui/EqualizerWindow.cs \
+	$(srcdir)/Banshee.Equalizer.Gui/EqualizerBandScale.cs \
+	$(srcdir)/Banshee.Equalizer.Gui/EqualizerLevelsBox.cs \
+	$(srcdir)/Banshee.Equalizer.Gui/EqualizerPresetComboBox.cs
+
+BANSHEE_GUI_DRAGDROP_SOURCES = \
+	$(srcdir)/Banshee.Gui.DragDrop/DragDropList.cs \
+	$(srcdir)/Banshee.Gui.DragDrop/DragDropTarget.cs \
+	$(srcdir)/Banshee.Gui.DragDrop/DragDropUtilities.cs 
+
 IO_SOURCES = \
 	$(srcdir)/IO/IOProxy.cs \
 	$(srcdir)/IO/Interfaces.cs \
@@ -52,6 +68,7 @@ IO_SOURCES = \
 	$(srcdir)/IO/Unix.cs
 
 GUI_SOURCES = \
+	$(srcdir)/Gui/GladeWindow.cs \
 	$(srcdir)/Gui/GladeDialog.cs \
 	$(srcdir)/Gui/ImportDialog.cs \
 	$(srcdir)/Gui/OpenLocationDialog.cs \
@@ -59,13 +76,13 @@ GUI_SOURCES = \
 	$(srcdir)/Gui/SeekDialog.cs \
 	$(srcdir)/Gui/ErrorListDialog.cs \
 	$(srcdir)/Gui/SplashScreen.cs \
-	$(srcdir)/Gui/PreferencesDialog.cs 
+	$(srcdir)/Gui/PreferencesDialog.cs
 
 AUDIOCD_SOURCES = \
 	$(srcdir)/AudioCd/AudioCdCore.cs \
 	$(srcdir)/AudioCd/AudioCdTrackInfo.cs \
 	$(srcdir)/AudioCd/AudioCdDisk.cs
-	
+
 DAP_SOURCES = \
 	$(srcdir)/Dap/Dap.cs \
 	$(srcdir)/Dap/DapCore.cs \
@@ -77,6 +94,7 @@ SOURCES_SOURCES = \
 	$(srcdir)/SourceManager.cs \
 	$(srcdir)/Source.cs \
 	$(srcdir)/ChildSource.cs \
+	$(srcdir)/Sources/IImportable.cs \
 	$(srcdir)/Sources/LibrarySource.cs \
 	$(srcdir)/Sources/PlaylistSource.cs \
 	$(srcdir)/Sources/AudioCdSource.cs \
@@ -114,6 +132,9 @@ ASSEMBLY_SOURCES = \
 	$(BANSHEE_CDROM_ISO_SOURCES) \
 	$(BANSHEE_CDROM_ISO_MKISOFS_SOURCES) \
 	$(BANSHEE_BURNER_SOURCES) \
+	$(BANSHEE_EQUALIZER_SOURCES) \
+	$(BANSHEE_EQUALIZER_GUI_SOURCES) \
+	$(BANSHEE_GUI_DRAGDROP_SOURCES) \
 	$(srcdir)/ActionManager.cs \
 	$(srcdir)/HalCore.cs \
 	$(srcdir)/Utilities.cs \
@@ -162,10 +183,10 @@ ASSEMBLY_SOURCES = \
 	$(srcdir)/BansheeBranding.cs \
 	$(srcdir)/CreativeCommons.cs \
 	$(srcdir)/ComponentInitializer.cs \
-	$(srcdir)/PowerManagement.cs 
+	$(srcdir)/PowerManagement.cs
 
 $(ASSEMBLY): $(ASSEMBLY_SOURCES) $(srcdir)/../../data/UIManagerLayout.xml
-	$(MCS) $(MCS_FLAGS) -target:library -r:System.Data -r:Mono.Data.SqliteClient -r:$(top_builddir)/entagged-sharp/entagged-sharp.dll -r:$(top_builddir)/cc-sharp/cc-sharp.dll -r:$(top_builddir)/src/Banshee.Widgets/Banshee.Widgets.dll -r:$(top_builddir)/burn-sharp/burn-sharp.dll -r:$(top_builddir)/src/MusicBrainz/MusicBrainz.dll -r:$(top_builddir)/hal-sharp/hal-sharp.dll $(GTKSHARP_LIBS) $(DBUSSHARP_LIBS) -r:Mono.Posix $(DAAPSHARP_LIBS) -resource:$(srcdir)/../../data/UIManagerLayout.xml,UIManagerLayout.xml -resource:$(srcdir)/../../data/images/splash.png,splash.png -out:$@ $(ASSEMBLY_SOURCES) $(bansheebase_generated_sources)
+	$(MCS) $(MCS_FLAGS) -target:library -r:System.Data -r:Mono.Data.SqliteClient -r:$(top_builddir)/entagged-sharp/entagged-sharp.dll -r:$(top_builddir)/src/Banshee.Widgets/Banshee.Widgets.dll -r:$(top_builddir)/burn-sharp/burn-sharp.dll -r:$(top_builddir)/cc-sharp/cc-sharp.dll -r:$(top_builddir)/src/MusicBrainz/MusicBrainz.dll -r:$(top_builddir)/hal-sharp/hal-sharp.dll $(GTKSHARP_LIBS) $(DBUSSHARP_LIBS) -r:Mono.Posix $(DAAPSHARP_LIBS) -resource:$(srcdir)/../../data/UIManagerLayout.xml,UIManagerLayout.xml -resource:$(srcdir)/../../data/images/splash.png,splash.png -out:$@ $(ASSEMBLY_SOURCES) $(bansheebase_generated_sources)
 
 EXTRA_DIST = $(ASSEMBLY_SOURCES) $(bansheebase_sources_in) $(ASSEMBLY).config.in 
 CLEANFILES = $(ASSEMBLY) *.dll *.exe
