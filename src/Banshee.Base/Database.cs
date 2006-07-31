@@ -162,6 +162,13 @@ namespace Banshee.Base
                 LogCore.Instance.PushDebug("Adding new database column", "MetadataURI TEXT");
                 Execute("ALTER TABLE Tracks ADD MetadataURI TEXT");
             }
+            
+            try {
+                QuerySingle("SELECT LicenseVerifyStatus FROM Tracks LIMIT 1");
+            } catch(ApplicationException) {
+                LogCore.Instance.PushDebug("Adding new database column", "LicenseVerifyStatus INTEGER");
+                Execute("ALTER TABLE Tracks ADD LicenseVerifyStatus INTEGER");
+            }   
         }
     }
 }

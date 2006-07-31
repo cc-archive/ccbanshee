@@ -39,6 +39,12 @@ namespace Banshee.Base
         Failure
     }
     
+    public enum LicenseVerifyStatus {
+        NoAttempt = 0,
+        Success,
+        Failure
+    }
+    
     public class HaveTrackInfoArgs : EventArgs
     {
         public TrackInfo TrackInfo;
@@ -83,6 +89,7 @@ namespace Banshee.Base
         protected bool can_save_to_database;
         protected bool can_play = true;
         protected RemoteLookupStatus remote_lookup_status = RemoteLookupStatus.NoAttempt;
+        protected LicenseVerifyStatus license_verify_status = LicenseVerifyStatus.NoAttempt;
 
         public Gtk.TreeIter PreviousTrack;
         public Gtk.TreeIter TreeIter;
@@ -165,6 +172,16 @@ namespace Banshee.Base
             
             set {
                 remote_lookup_status = value;
+            }
+        }
+        
+        public LicenseVerifyStatus LicenseVerifyStatus {
+            get {
+                return license_verify_status;
+            }
+            
+            set {
+                license_verify_status = value;
             }
         }
         

@@ -318,7 +318,8 @@ namespace Banshee.Base
                     "Rating", rating, 
                     "NumberOfPlays", play_count, 
                     "LastPlayedStamp", DateTimeUtil.FromDateTime(last_played),
-                    "RemoteLookupStatus", (int)remote_lookup_status);
+                    "RemoteLookupStatus", (int)remote_lookup_status,
+                    "LicenseVerifyStatus", (int)license_verify_status);
             } else {
                 tracksQuery = new Update("Tracks",
                     "Uri", uri.AbsoluteUri,
@@ -346,7 +347,8 @@ namespace Banshee.Base
                     "Rating", rating, 
                     "NumberOfPlays", play_count, 
                     "LastPlayedStamp", DateTimeUtil.FromDateTime(last_played),
-                    "RemoteLookupStatus", (int)remote_lookup_status) +
+                    "RemoteLookupStatus", (int)remote_lookup_status,
+                    "LicenseVerifyStatus", (int)license_verify_status) +
                     new Where(new Compare("TrackID", Op.EqualTo, track_id));// +
                 //    new Limit(1);
             }
@@ -420,6 +422,7 @@ namespace Banshee.Base
             play_count = Convert.ToUInt32(reader["NumberOfPlays"]);
             
             remote_lookup_status = (RemoteLookupStatus)Convert.ToInt32(reader["RemoteLookupStatus"]);
+            license_verify_status = (LicenseVerifyStatus)Convert.ToInt32(reader["LicenseVerifyStatus"]);
             
             duration = new TimeSpan(Convert.ToInt64(reader["Duration"]) * TimeSpan.TicksPerSecond);
             

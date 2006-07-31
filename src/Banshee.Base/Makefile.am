@@ -61,6 +61,13 @@ BANSHEE_GUI_DRAGDROP_SOURCES = \
 	$(srcdir)/Banshee.Gui.DragDrop/DragDropTarget.cs \
 	$(srcdir)/Banshee.Gui.DragDrop/DragDropUtilities.cs 
 
+BANSHEE_KERNEL_SOURCES = \
+	$(srcdir)/Banshee.Kernel/IntervalHeap.cs \
+	$(srcdir)/Banshee.Kernel/IJob.cs \
+	$(srcdir)/Banshee.Kernel/Job.cs \
+	$(srcdir)/Banshee.Kernel/JobPriority.cs \
+	$(srcdir)/Banshee.Kernel/Scheduler.cs
+
 IO_SOURCES = \
 	$(srcdir)/IO/IOProxy.cs \
 	$(srcdir)/IO/Interfaces.cs \
@@ -135,6 +142,7 @@ ASSEMBLY_SOURCES = \
 	$(BANSHEE_EQUALIZER_SOURCES) \
 	$(BANSHEE_EQUALIZER_GUI_SOURCES) \
 	$(BANSHEE_GUI_DRAGDROP_SOURCES) \
+	$(BANSHEE_KERNEL_SOURCES) \
 	$(srcdir)/ActionManager.cs \
 	$(srcdir)/HalCore.cs \
 	$(srcdir)/Utilities.cs \
@@ -181,12 +189,11 @@ ASSEMBLY_SOURCES = \
 	$(srcdir)/Catalog.cs \
 	$(srcdir)/Branding.cs \
 	$(srcdir)/BansheeBranding.cs \
-	$(srcdir)/CreativeCommons.cs \
 	$(srcdir)/ComponentInitializer.cs \
 	$(srcdir)/PowerManagement.cs
 
 $(ASSEMBLY): $(ASSEMBLY_SOURCES) $(srcdir)/../../data/UIManagerLayout.xml
-	$(MCS) $(MCS_FLAGS) -target:library -r:System.Data -r:Mono.Data.SqliteClient -r:$(top_builddir)/entagged-sharp/entagged-sharp.dll -r:$(top_builddir)/src/Banshee.Widgets/Banshee.Widgets.dll -r:$(top_builddir)/burn-sharp/burn-sharp.dll -r:$(top_builddir)/cc-sharp/cc-sharp.dll -r:$(top_builddir)/src/MusicBrainz/MusicBrainz.dll -r:$(top_builddir)/hal-sharp/hal-sharp.dll $(GTKSHARP_LIBS) $(DBUSSHARP_LIBS) -r:Mono.Posix $(DAAPSHARP_LIBS) -resource:$(srcdir)/../../data/UIManagerLayout.xml,UIManagerLayout.xml -resource:$(srcdir)/../../data/images/splash.png,splash.png -out:$@ $(ASSEMBLY_SOURCES) $(bansheebase_generated_sources)
+	$(MCS) $(MCS_FLAGS) -target:library -r:System.Data -r:Mono.Data.SqliteClient -r:$(top_builddir)/entagged-sharp/entagged-sharp.dll -r:$(top_builddir)/src/Banshee.Widgets/Banshee.Widgets.dll -r:$(top_builddir)/burn-sharp/burn-sharp.dll -r:$(top_builddir)/src/MusicBrainz/MusicBrainz.dll -r:$(top_builddir)/hal-sharp/hal-sharp.dll $(GTKSHARP_LIBS) $(DBUSSHARP_LIBS) -r:Mono.Posix $(DAAPSHARP_LIBS) -resource:$(srcdir)/../../data/UIManagerLayout.xml,UIManagerLayout.xml -resource:$(srcdir)/../../data/images/splash.png,splash.png -out:$@ $(ASSEMBLY_SOURCES) $(bansheebase_generated_sources)
 
 EXTRA_DIST = $(ASSEMBLY_SOURCES) $(bansheebase_sources_in) $(ASSEMBLY).config.in 
 CLEANFILES = $(ASSEMBLY) *.dll *.exe

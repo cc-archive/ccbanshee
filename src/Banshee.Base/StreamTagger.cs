@@ -69,7 +69,6 @@ namespace Banshee.Base
                         break;
                     case CommonTags.Copyright:
                         track.Copyright = Choose((string)tag.Value, track.Copyright);
-                        CreativeCommons.VerifyLicense(track);
                         break;
                     case CommonTags.TrackNumber:
                         uint track_number = (uint)tag.Value;
