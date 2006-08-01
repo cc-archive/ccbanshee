@@ -81,6 +81,7 @@ namespace Banshee.Base
                    	DateAddedStamp INTEGER,
                    	
                    	RemoteLookupStatus INTEGER
+                   	LicenseVerifyStatus INTEGER
                 )");
             }
             
@@ -135,6 +136,7 @@ namespace Banshee.Base
                 Execute("ALTER TABLE PlaylistEntries ADD ViewOrder INTEGER NOT NULL DEFAULT 0");
             }
             
+            /* License Handling */
             try {
                 QuerySingle("SELECT License FROM Tracks LIMIT 1");
             } catch(ApplicationException) {

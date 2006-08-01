@@ -258,13 +258,7 @@ namespace Banshee
                     Channels.Text = af.Channels.ToString();
                     MimeType.Text = af.MimeType;
                     ExtraInfo.Text = af.EncodingType;
-
-                    if(track.Track.License != null)
-                        License.Text = String.Format("{0}", track.Track.LicenseUri);
-                    else if(track.Track.LicenseUri != null)
-                        License.Text = String.Format("Invalid claim: {0}", track.Track.LicenseUri);
-                    else
-                        License.Text = "None";
+                    License.Text = GetLicenseText(track.Track);
                 } catch(Exception e) {
                     BitRate.Text = Catalog.GetString("Unknown");
                     SampleRate.Text = Catalog.GetString("Unknown");
@@ -278,6 +272,22 @@ namespace Banshee
             
             Previous.Sensitive = index > 0;
             Next.Sensitive = index < TrackSet.Count - 1;
+        }
+        
+        private string GetLicenseText(TrackInfo track)
+        {
+            if(track.License == null) {
+                if(track.LicenseUri == null) {
+                    return "None";
+                } else {
+                    if(track.LicenseVerifyStatus != 0)
+                        return String.Format("<small><i>Invalid claim</i></small> {0}", track.LicenseUri);
+                    else
+                        return track.LicenseUri;
+                }
+            } else {
+                return track.LicenseUri;
+            }
         }
         
         private void OnPreviousClicked(object o, EventArgs args)

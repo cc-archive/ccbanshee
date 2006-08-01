@@ -157,8 +157,10 @@ namespace Banshee.Base
         }
 
         public LibraryTrackInfo(SafeUri uri, string artist, string album, 
-           string title, string genre, uint track_number, uint track_count,
-           int year, TimeSpan duration, string asin, RemoteLookupStatus remote_lookup_status)
+           string title, string genre, string license_attributes,
+           string copyright, string license_uri, string metadata_uri, uint track_number,
+           uint track_count, int year, TimeSpan duration, string asin,
+           RemoteLookupStatus remote_lookup_status, LicenseVerifyStatus license_verify_status)
         {
             this.uri = uri;
             track_id = 0;
@@ -169,12 +171,20 @@ namespace Banshee.Base
             this.album = album;
             this.title = title;
             this.genre = genre;
+            
+            this.license_attributes = license_attributes;
+            this.copyright = copyright;
+            this.license_uri = license_uri;
+            this.metadata_uri = metadata_uri;
+            
             this.track_number = track_number;
             this.track_count = track_count;
             this.year = year;
             this.duration = duration;
             this.asin = asin;
+            
             this.remote_lookup_status = remote_lookup_status;
+            this.license_verify_status = license_verify_status;
             
             this.date_added = DateTime.Now;
             
@@ -188,8 +198,9 @@ namespace Banshee.Base
         
         public LibraryTrackInfo(SafeUri uri, TrackInfo track) : this(
             uri, track.Artist, track.Album, track.Title, track.Genre,
+            track.LicenseAttributes, track.Copyright, track.LicenseUri, track.MetadataUri,
             track.TrackNumber, track.TrackCount, track.Year, track.Duration, 
-            track.Asin, track.RemoteLookupStatus)
+            track.Asin, track.RemoteLookupStatus, track.LicenseVerifyStatus)
         {
         }
     
