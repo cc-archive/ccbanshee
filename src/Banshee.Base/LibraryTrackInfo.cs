@@ -157,7 +157,7 @@ namespace Banshee.Base
         }
 
         public LibraryTrackInfo(SafeUri uri, string artist, string album, 
-           string title, string genre, string license_attributes,
+           string title, string genre, string license,
            string copyright, string license_uri, string metadata_uri, uint track_number,
            uint track_count, int year, TimeSpan duration, string asin,
            RemoteLookupStatus remote_lookup_status, LicenseVerifyStatus license_verify_status)
@@ -172,7 +172,7 @@ namespace Banshee.Base
             this.title = title;
             this.genre = genre;
             
-            this.license_attributes = license_attributes;
+            this.license = license;
             this.copyright = copyright;
             this.license_uri = license_uri;
             this.metadata_uri = metadata_uri;
@@ -198,7 +198,7 @@ namespace Banshee.Base
         
         public LibraryTrackInfo(SafeUri uri, TrackInfo track) : this(
             uri, track.Artist, track.Album, track.Title, track.Genre,
-            track.LicenseAttributes, track.Copyright, track.LicenseUri, track.MetadataUri,
+            track.License, track.Copyright, track.LicenseUri, track.MetadataUri,
             track.TrackNumber, track.TrackCount, track.Year, track.Duration, 
             track.Asin, track.RemoteLookupStatus, track.LicenseVerifyStatus)
         {
@@ -215,9 +215,9 @@ namespace Banshee.Base
                 CheckIfExists(uri);
                 SaveToDatabase(true);
             }
-
+            
             Globals.Library.SetTrack(track_id, this);
-
+            
             PreviousTrack = Gtk.TreeIter.Zero;
         }
         
@@ -298,7 +298,8 @@ namespace Banshee.Base
         private void SaveToDatabase(bool retryIfFail)
         {
             Statement tracksQuery;
-
+            Statement trackLicensesQuery;
+            
 //            Console.WriteLine ("{0} has id {1}", uri.LocalPath, TrackId);
 
             if(track_id <= 0) {
@@ -313,10 +314,6 @@ namespace Banshee.Base
                     "Label", label,
                     "Title", title, 
                     "Genre", genre, 
-                    "License", license,
-                    "Copyright", copyright,
-                    "LicenseURI", license_uri,
-                    "MetadataURI", metadata_uri,
                     "Year", year,
                     "DateAddedStamp", DateTimeUtil.FromDateTime(date_added), 
                     "TrackNumber", track_number, 
@@ -329,7 +326,14 @@ namespace Banshee.Base
                     "Rating", rating, 
                     "NumberOfPlays", play_count, 
                     "LastPlayedStamp", DateTimeUtil.FromDateTime(last_played),
-                    "RemoteLookupStatus", (int)remote_lookup_status,
+                    "RemoteLookupStatus", (int)remote_lookup_status);
+                
+                trackLicensesQuery = new Insert("TrackLicenses", true,
+                    "TrackID", null, 
+                    "License", license,
+                    "Copyright", copyright,
+                    "LicenseURI", license_uri,
+                    "MetadataURI", metadata_uri,
                     "LicenseVerifyStatus", (int)license_verify_status);
             } else {
                 tracksQuery = new Update("Tracks",
@@ -342,10 +346,6 @@ namespace Banshee.Base
                     "Label", label,
                     "Title", title, 
                     "Genre", genre, 
-                    "License", license,
-                    "Copyright", copyright,
-                    "LicenseURI", license_uri,
-                    "MetadataURI", metadata_uri,
                     "Year", year,
                     "DateAddedStamp", DateTimeUtil.FromDateTime(date_added), 
                     "TrackNumber", track_number, 
@@ -358,18 +358,26 @@ namespace Banshee.Base
                     "Rating", rating, 
                     "NumberOfPlays", play_count, 
                     "LastPlayedStamp", DateTimeUtil.FromDateTime(last_played),
-                    "RemoteLookupStatus", (int)remote_lookup_status,
-                    "LicenseVerifyStatus", (int)license_verify_status) +
+                    "RemoteLookupStatus", (int)remote_lookup_status) +
                     new Where(new Compare("TrackID", Op.EqualTo, track_id));// +
-                //    new Limit(1);
+                    //    new Limit(1);
+                
+                trackLicensesQuery = new Update("TrackLicenses",
+                    "License", license,
+                    "Copyright", copyright,
+                    "LicenseURI", license_uri,
+                    "MetadataURI", metadata_uri,
+                    "LicenseVerifyStatus", (int)license_verify_status) +
+                    new Where(new Compare("TrackID", Op.EqualTo, track_id));
             }
             
             try {
                 Globals.Library.Db.Execute(tracksQuery);
+                Globals.Library.Db.Execute(trackLicensesQuery);
             } catch(Exception e) {
                 Console.WriteLine(e);
             }
-
+            
             /*if(Core.Library.Db.Execute(query) <= 0 && retryIfFail) {
                 track_id = 0;
                 SaveToDatabase(false);
@@ -405,6 +413,24 @@ namespace Banshee.Base
         private void LoadFromDatabaseReader(IDataReader reader)
         {
             track_id = Convert.ToInt32(reader["TrackID"]);
+            
+            string query = String.Format(@"
+                SELECT * 
+                FROM TrackLicenses
+                WHERE TrackID = '{0}'
+                LIMIT 1", track_id
+            );
+            
+            IDataReader track_license_reader = Globals.Library.Db.Query(query);
+
+            if(track_license_reader != null && track_license_reader.Read()) {
+                license = track_license_reader["License"] as string;
+                copyright = track_license_reader["Copyright"] as string;
+                license_uri = track_license_reader["LicenseURI"] as string;
+                metadata_uri = track_license_reader["MetadataURI"] as string;
+                license_verify_status = (LicenseVerifyStatus)Convert.ToInt32(
+                                            track_license_reader["LicenseVerifyStatus"]);
+            }
 
             uri = new SafeUri(reader["Uri"] as string, true);
             mimetype = reader["MimeType"] as string;
@@ -414,12 +440,6 @@ namespace Banshee.Base
             performer = reader["Performer"] as string;
             title = reader["Title"] as string;
             genre = reader["Genre"] as string;
-            
-            license = reader["License"] as string;
-            copyright = reader["Copyright"] as string;
-            license_uri = reader["LicenseURI"] as string;
-            metadata_uri = reader["MetadataURI"] as string;
-            
             asin = reader["ASIN"] as string;
             
             if(genre == "Unknown") {
@@ -433,7 +453,6 @@ namespace Banshee.Base
             play_count = Convert.ToUInt32(reader["NumberOfPlays"]);
             
             remote_lookup_status = (RemoteLookupStatus)Convert.ToInt32(reader["RemoteLookupStatus"]);
-            license_verify_status = (LicenseVerifyStatus)Convert.ToInt32(reader["LicenseVerifyStatus"]);
             
             duration = new TimeSpan(Convert.ToInt64(reader["Duration"]) * TimeSpan.TicksPerSecond);
             

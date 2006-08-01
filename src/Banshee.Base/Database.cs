@@ -59,11 +59,6 @@ namespace Banshee.Base
                    	Title TEXT,
                    	Genre TEXT,
                    	
-                   	License TEXT,
-                   	Copyright TEXT,
-                   	LicenseURI TEXT,
-                   	MetadataURI TEXT,
-                   	
                    	Year INTEGER,
                    	
                    	TrackNumber INTEGER,
@@ -81,7 +76,6 @@ namespace Banshee.Base
                    	DateAddedStamp INTEGER,
                    	
                    	RemoteLookupStatus INTEGER
-                   	LicenseVerifyStatus INTEGER
                 )");
             }
             
@@ -102,6 +96,20 @@ namespace Banshee.Base
                     PlaylistID INTEGER NOT NULL,
                     TrackID INTEGER NOT NULL,
                     ViewOrder INTEGER NOT NULL DEFAULT 0
+                )");
+            }
+            
+            if(!TableExists("TrackLicenses")) {
+                Console.WriteLine("Creating tracklicenses table");
+                Execute(@"
+                CREATE TABLE TrackLicenses (
+                   	TrackID INTEGER PRIMARY KEY,
+                   	
+                   	License TEXT,
+                   	Copyright TEXT,
+                   	LicenseURI TEXT,
+                   	MetadataURI TEXT,
+                   	LicenseVerifyStatus INTEGER
                 )");
             }
         }
@@ -138,38 +146,38 @@ namespace Banshee.Base
             
             /* License Handling */
             try {
-                QuerySingle("SELECT License FROM Tracks LIMIT 1");
+                QuerySingle("SELECT License FROM TrackLicenses LIMIT 1");
             } catch(ApplicationException) {
                 LogCore.Instance.PushDebug("Adding new database column", "License TEXT");
-                Execute("ALTER TABLE Tracks ADD License TEXT");
+                Execute("ALTER TABLE TrackLicenses ADD License TEXT");
             }
   
             try {
-                QuerySingle("SELECT Copyright FROM Tracks LIMIT 1");
+                QuerySingle("SELECT Copyright FROM TrackLicenses LIMIT 1");
             } catch(ApplicationException) {
                 LogCore.Instance.PushDebug("Adding new database column", "Copyright TEXT");
-                Execute("ALTER TABLE Tracks ADD Copyright TEXT");
+                Execute("ALTER TABLE TrackLicenses ADD Copyright TEXT");
             }
   
             try {
-                QuerySingle("SELECT LicenseURI FROM Tracks LIMIT 1");
+                QuerySingle("SELECT LicenseURI FROM TrackLicenses LIMIT 1");
             } catch(ApplicationException) {
                 LogCore.Instance.PushDebug("Adding new database column", "LicenseURI TEXT");
-                Execute("ALTER TABLE Tracks ADD LicenseURI TEXT");
+                Execute("ALTER TABLE TrackLicenses ADD LicenseURI TEXT");
             }
 
             try {
-                QuerySingle("SELECT MetadataURI FROM Tracks LIMIT 1");
+                QuerySingle("SELECT MetadataURI FROM TrackLicenses LIMIT 1");
             } catch(ApplicationException) {
                 LogCore.Instance.PushDebug("Adding new database column", "MetadataURI TEXT");
-                Execute("ALTER TABLE Tracks ADD MetadataURI TEXT");
+                Execute("ALTER TABLE TrackLicenses ADD MetadataURI TEXT");
             }
             
             try {
-                QuerySingle("SELECT LicenseVerifyStatus FROM Tracks LIMIT 1");
+                QuerySingle("SELECT LicenseVerifyStatus FROM TrackLicenses LIMIT 1");
             } catch(ApplicationException) {
                 LogCore.Instance.PushDebug("Adding new database column", "LicenseVerifyStatus INTEGER");
-                Execute("ALTER TABLE Tracks ADD LicenseVerifyStatus INTEGER");
+                Execute("ALTER TABLE TrackLicenses ADD LicenseVerifyStatus INTEGER");
             }   
         }
     }

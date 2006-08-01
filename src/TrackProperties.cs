@@ -117,7 +117,6 @@ namespace Banshee
         [Widget] private Label Channels;
         [Widget] private Label MimeType;
         [Widget] private Label ExtraInfo;
-        [Widget] private Label License;
         
         Tooltips tips = new Tooltips();
         
@@ -258,7 +257,7 @@ namespace Banshee
                     Channels.Text = af.Channels.ToString();
                     MimeType.Text = af.MimeType;
                     ExtraInfo.Text = af.EncodingType;
-                    License.Text = GetLicenseText(track.Track);
+                    (glade["License"] as Label).Markup = GetLicenseText(track.Track);
                 } catch(Exception e) {
                     BitRate.Text = Catalog.GetString("Unknown");
                     SampleRate.Text = Catalog.GetString("Unknown");
@@ -266,7 +265,7 @@ namespace Banshee
                     Channels.Text = Catalog.GetString("Unknown");
                     MimeType.Text = Catalog.GetString("Unknown");
                     ExtraInfo.Text = Catalog.GetString("Unknown");
-                    License.Text = Catalog.GetString("Unknown");                    
+                    (glade["License"] as Label).Markup = Catalog.GetString("Unknown");                    
                 }
             }
             
@@ -281,7 +280,7 @@ namespace Banshee
                     return "None";
                 } else {
                     if(track.LicenseVerifyStatus != 0)
-                        return String.Format("<small><i>Invalid claim</i></small> {0}", track.LicenseUri);
+                        return String.Format("{0} <small><i>(Invalid claim)</i></small>", track.LicenseUri);
                     else
                         return track.LicenseUri;
                 }
