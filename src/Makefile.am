@@ -34,12 +34,10 @@ banshee_generated_sources = $(banshee_sources_in:.in=) \
 	AmazonSearchService.cs
 
 banshee_sources = \
-	AboutBox.cs \
 	Main.cs \
 	StockIcons.cs \
 	PlayerInterface.cs \
 	PlaylistView.cs \
-	Dialogs.cs \
 	TrackProperties.cs \
 	SourceView.cs \
 	PlaylistModel.cs \
@@ -54,7 +52,6 @@ banshee_sources = \
 	ToggleStates.cs
 
 banshee_resources = \
-	COPYING \
 	data/banshee.glade \
 	data/images/advanced-icon-32.png \
 	data/images/banshee-logo.png \
@@ -103,15 +100,23 @@ banshee_resources = \
 	data/images/cd-action-burn-24.png \
 	data/images/cd-action-burn-32.png \
 	data/images/cd-action-burn-48.png \
-	data/images/cc-attribution.png \
-	data/images/cc-no-derivs.png \
-	data/images/cc-noncommercial.png \
-	data/images/cc-public-domain.png \
-	data/images/cc-sampling-plus.png \
-	data/images/cc-sampling.png \
-	data/images/cc-share-alike.png \
-	data/images/cc-standard.png \
-	data/images/encode-action-24.png
+	data/images/encode-action-24.png \
+	data/images/cc-by_nc_nd.png \
+    data/images/cc-by_nc.png \
+    data/images/cc-by_nc_sa.png \
+    data/images/cc-by_nd.png \
+    data/images/cc-by.png \
+    data/images/cc-by_sa.png \
+    data/images/cc-devnations.png \
+    data/images/cc-nc.png \
+    data/images/cc-nc_samplingplus.png \
+    data/images/cc-nc_sa.png \
+    data/images/cc-nd_nc.png \
+    data/images/cc-nd.png \
+    data/images/cc-publicdomain.png \
+    data/images/cc-samplingplus.png \
+    data/images/cc-sampling.png \
+    data/images/cc-sa.png
 
 banshee_resources_build = $(foreach res,$(banshee_resources), $(addprefix -resource:,$(srcdir)/../$(res)),$(notdir $(res)))
 

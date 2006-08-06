@@ -275,18 +275,12 @@ namespace Banshee
         
         private string GetLicenseText(TrackInfo track)
         {
-            if(track.License == null) {
-                if(track.LicenseUri == null) {
-                    return "None";
-                } else {
-                    if(track.LicenseVerifyStatus != 0)
-                        return String.Format("{0} <small><i>(Invalid claim)</i></small>", track.LicenseUri);
-                    else
-                        return track.LicenseUri;
-                }
-            } else {
+            if(track.License == Licenses.Attributes.none) // No License
+                return "None";
+		    else if(track.LicenseVerifyStatus == LicenseVerifyStatus.Invalid) // Invalid License
+                return String.Format("{0} <small><i>(Invalid claim)</i></small>", track.LicenseUri);
+            else // Verify not attempted or has been Verified
                 return track.LicenseUri;
-            }
         }
         
         private void OnPreviousClicked(object o, EventArgs args)

@@ -306,8 +306,14 @@ namespace Banshee
         public int LicenseTreeIterCompareFunc(TreeModel _model, TreeIter a, 
             TreeIter b)
         {
-            return StringFieldCompare(model.IterTrackInfo(a).License, 
-                model.IterTrackInfo(b).License);
+            if(model.IterTrackInfo(a).LicenseVerifyStatus == LicenseVerifyStatus.Invalid &&
+               model.IterTrackInfo(b).LicenseVerifyStatus != LicenseVerifyStatus.Invalid)
+                return -1;
+            else if(model.IterTrackInfo(b).LicenseVerifyStatus == LicenseVerifyStatus.Invalid &&
+                    model.IterTrackInfo(a).LicenseVerifyStatus != LicenseVerifyStatus.Invalid)
+                return 1;
+            else
+                return model.IterTrackInfo(a).License - model.IterTrackInfo(b).License;
         }  
         
         public int YearTreeIterCompareFunc(TreeModel _model, TreeIter a,

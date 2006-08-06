@@ -67,15 +67,24 @@ EXTRA_DIST = \
 	cd-action-burn-32.png \
 	cd-action-burn-48.png \
 	encode-action-24.png \
-	cc-attribution.png \
-	cc-no-derivs.png \
-	cc-noncommercial.png \
-	cc-public-domain.png \
-	cc-sampling-plus.png \
-	cc-sampling.png \
-	cc-share-alike.png \
-	cc-standard.png \
-	splash.png
+	splash.png \
+	cc-by_nc_nd.png \
+    cc-by_nc.png \
+    cc-by_nc_sa.png \
+    cc-by_nd.png \
+    cc-by.png \
+    cc-by_sa.png \
+    cc-devnations.png \
+    cc-nc.png \
+    cc-nc_samplingplus.png \
+    cc-nc_sa.png \
+    cc-nd_nc.png \
+    cc-nd.png \
+    cc-publicdomain.png \
+    cc-samplingplus.png \
+    cc-sampling.png \
+    cc-sa.png
+
 
 generate-resource-list:
 	for i in $(EXTRA_DIST); do \

@@ -4,9 +4,28 @@
  *  Copyright (C) 2006 Luke Hoersten
  *  Written by Luke Hoersten <luke.hoersten@gmail.com>
  ****************************************************************************/
+
+/*  THIS FILE IS LICENSED UNDER THE MIT LICENSE AS OUTLINED IMMEDIATELY BELOW: 
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a
+ *  copy of this software and associated documentation files (the "Software"),  
+ *  to deal in the Software without restriction, including without limitation  
+ *  the rights to use, copy, modify, merge, publish, distribute, sublicense,  
+ *  and/or sell copies of the Software, and to permit persons to whom the  
+ *  Software is furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in 
+ *  all copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+ *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ *  DEALINGS IN THE SOFTWARE.
+ */
  
-using System;
-using System.Collections.Generic;
 using Gtk;
 using Gdk;
 
@@ -16,38 +35,31 @@ namespace Banshee
 {
 	public class LicenseRenderer : CellRenderer
 	{
-	    private const int MAX_ATTRIBUTES = 3;
-	    private static string[] split_result = new string[MAX_ATTRIBUTES];
-	    private static char[] splitter  = {'-'};	    
-	    
-	    private static Dictionary<string, Gdk.Pixbuf> icons;	    
-	    
-		public TrackInfo Track;
+	    public TrackInfo Track;
+        private static Gdk.Pixbuf[] icon_lookup;
 		
 		public LicenseRenderer()
 		{
-			BuildDictionary();
+		    if(icon_lookup == null)
+		        LoadIcons();
 		}
 
 		protected LicenseRenderer(System.IntPtr ptr) : base(ptr)
 		{
-            BuildDictionary();
+		    if(icon_lookup == null)
+		        LoadIcons();
 		}
-		
-		private void BuildDictionary() {
-		    if(icons == null) {
-                icons = new Dictionary<string, Gdk.Pixbuf>();
-                icons.Add("by", Gdk.Pixbuf.LoadFromResource("cc-attribution.png"));
-                icons.Add("nd", Gdk.Pixbuf.LoadFromResource("cc-no-derivs.png"));
-                icons.Add("nc", Gdk.Pixbuf.LoadFromResource("cc-noncommercial.png"));
-                icons.Add("pd", Gdk.Pixbuf.LoadFromResource("cc-public-domain.png"));
-                icons.Add("sampling", Gdk.Pixbuf.LoadFromResource("cc-sampling.png"));
-                icons.Add("sampling+", Gdk.Pixbuf.LoadFromResource("cc-sampling-plus.png"));
-                icons.Add("sa", Gdk.Pixbuf.LoadFromResource("cc-share-alike.png"));
-                icons.Add("standard", Gdk.Pixbuf.LoadFromResource("cc-standard.png"));
-		    }
-		}
-		
+        
+        private void LoadIcons() {
+            System.Array values = System.Enum.GetValues(typeof(Licenses.Attributes));
+            icon_lookup = new Gdk.Pixbuf[values.Length];
+            
+            foreach(Licenses.Attributes la in values) {
+                if(la != Licenses.Attributes.none)
+                    icon_lookup[(int)la] = Gdk.Pixbuf.LoadFromResource("cc-" + la.ToString() + ".png");
+            }
+        }
+        
 		private StateType RendererStateToWidgetState(CellRendererState flags)
 		{
 		    StateType state = StateType.Normal;
@@ -68,7 +80,7 @@ namespace Banshee
 			Gdk.Rectangle cell_area, Gdk.Rectangle expose_area, 
 			CellRendererState flags)
 		{
-		    Gdk.Window window = drawable as Gdk.Window;
+			Gdk.Window window = drawable as Gdk.Window;
 			StateType state = RendererStateToWidgetState(flags);
 			
 			DrawLicense(window, widget, cell_area, state, flags);
@@ -77,8 +89,8 @@ namespace Banshee
 		public override void GetSize(Widget widget, ref Gdk.Rectangle cell_area, 
 			out int x_offset, out int y_offset, out int width, out int height)
 		{
-		    height = icons["by"].Height + 2;
-		    width = (icons["by"].Width * MAX_ATTRIBUTES) + 4;
+		    height = icon_lookup[(int)Licenses.Attributes.nd].Height + 2;
+		    width = (icon_lookup[(int)Licenses.Attributes.nd].Width * 3) + 4;
 		    x_offset = 0;
 		    y_offset = 0;
 		}
@@ -86,19 +98,22 @@ namespace Banshee
 		private void DrawLicense(Gdk.Window canvas, Gtk.Widget widget,
 			Gdk.Rectangle area, StateType state, CellRendererState flags)
 		{
-		    if(Track.License == null) {
+		    if(!ShowLicense(Track))
 		        return;
-		    }
-		    
-		    split_result.Initialize();
-            split_result = (Track.License).Split(splitter, MAX_ATTRIBUTES);
-		    
-		    for(int i = 0; i < split_result.Length; i++) {
-				canvas.DrawPixbuf(widget.Style.TextGC(state), icons[split_result[i]], 0, 0,
-					area.X + (i * icons["by"].Width) + 2, area.Y + 1, 
-					icons["by"].Width, icons["by"].Height,
-					RgbDither.None, 0, 0);
-			}
+    
+			canvas.DrawPixbuf(widget.Style.TextGC(state), icon_lookup[(int)Track.License], 0, 0,
+               area.X + 2, area.Y + 1, icon_lookup[(int)Track.License].Width,
+               icon_lookup[(int)Track.License].Height, RgbDither.None, 0, 0);
 		}
+		
+		public bool ShowLicense(TrackInfo track)
+        {
+            if(track.License == Licenses.Attributes.none) // No License
+		        return false;
+		    else if(track.LicenseVerifyStatus == LicenseVerifyStatus.Invalid) // Invalid License
+		        return false;
+		    else
+		        return true;
+        }
 	}
 }

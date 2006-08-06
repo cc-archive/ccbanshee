@@ -157,7 +157,7 @@ namespace Banshee.Base
         }
 
         public LibraryTrackInfo(SafeUri uri, string artist, string album, 
-           string title, string genre, string license,
+           string title, string genre, Licenses.Attributes license,
            string copyright, string license_uri, string metadata_uri, uint track_number,
            uint track_count, int year, TimeSpan duration, string asin,
            RemoteLookupStatus remote_lookup_status, LicenseVerifyStatus license_verify_status)
@@ -330,7 +330,7 @@ namespace Banshee.Base
                 
                 trackLicensesQuery = new Insert("TrackLicenses", true,
                     "TrackID", null, 
-                    "License", license,
+                    "License", (int)license,
                     "Copyright", copyright,
                     "LicenseURI", license_uri,
                     "MetadataURI", metadata_uri,
@@ -363,7 +363,7 @@ namespace Banshee.Base
                     //    new Limit(1);
                 
                 trackLicensesQuery = new Update("TrackLicenses",
-                    "License", license,
+                    "License", (int)license,
                     "Copyright", copyright,
                     "LicenseURI", license_uri,
                     "MetadataURI", metadata_uri,
@@ -421,15 +421,16 @@ namespace Banshee.Base
                 LIMIT 1", track_id
             );
             
-            IDataReader track_license_reader = Globals.Library.Db.Query(query);
+            IDataReader license_reader = Globals.Library.Db.Query(query);
 
-            if(track_license_reader != null && track_license_reader.Read()) {
-                license = track_license_reader["License"] as string;
-                copyright = track_license_reader["Copyright"] as string;
-                license_uri = track_license_reader["LicenseURI"] as string;
-                metadata_uri = track_license_reader["MetadataURI"] as string;
+            if(license_reader != null && license_reader.Read()) {
+                license = (Licenses.Attributes)Convert.ToInt32(
+                                            license_reader["License"]);
+                copyright = license_reader["Copyright"] as string;
+                license_uri = license_reader["LicenseURI"] as string;
+                metadata_uri = license_reader["MetadataURI"] as string;
                 license_verify_status = (LicenseVerifyStatus)Convert.ToInt32(
-                                            track_license_reader["LicenseVerifyStatus"]);
+                                            license_reader["LicenseVerifyStatus"]);
             }
 
             uri = new SafeUri(reader["Uri"] as string, true);

@@ -27,7 +27,6 @@
  */
  
 using System;
-using System.Diagnostics;
 
 namespace Banshee.Base
 {
@@ -69,6 +68,7 @@ namespace Banshee.Base
                         break;
                     case CommonTags.Copyright:
                         track.Copyright = Choose((string)tag.Value, track.Copyright);
+                        Licenses.FillTags(track);
                         break;
                     case CommonTags.TrackNumber:
                         uint track_number = (uint)tag.Value;

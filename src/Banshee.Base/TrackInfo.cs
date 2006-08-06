@@ -41,8 +41,8 @@ namespace Banshee.Base
     
     public enum LicenseVerifyStatus {
         NoAttempt = 0,
-        Success,
-        Failure
+        Valid,
+        Invalid
     }
     
     public class HaveTrackInfoArgs : EventArgs
@@ -64,7 +64,7 @@ namespace Banshee.Base
         protected string genre;
         protected string performer;
 
-        protected string license;       // License name; Empty if unverified
+        protected Licenses.Attributes license = Licenses.Attributes.none;   // None if unverified
         protected string copyright;     // License and Verification URIs (TCOP)
         protected string license_uri;   // License URI (WCOP)
         protected string metadata_uri;  // Metadata verification URI (WOAF)
@@ -104,7 +104,7 @@ namespace Banshee.Base
         {
             uid = next_id++;
         }
-
+        
         public virtual void Save()
         {
         }
@@ -279,7 +279,7 @@ namespace Banshee.Base
             } 
         }
 
-        public string License {
+        public Licenses.Attributes License {
             get {
                 return license;
             }
@@ -296,7 +296,7 @@ namespace Banshee.Base
             }
 
             set { 
-                copyright = value; 
+                copyright = value;
                 WriteUpdate();
             } 
         }
@@ -307,7 +307,7 @@ namespace Banshee.Base
             }
 
             set { 
-                license_uri = value; 
+                license_uri = value;
                 WriteUpdate();
             } 
         }
@@ -510,5 +510,5 @@ namespace Banshee.Base
         {
             return Artist.GetHashCode() ^ Album.GetHashCode() ^ Title.GetHashCode();
         }
-    }    
+    }
 }

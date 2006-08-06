@@ -105,7 +105,7 @@ namespace Banshee.Base
                 CREATE TABLE TrackLicenses (
                    	TrackID INTEGER PRIMARY KEY,
                    	
-                   	License TEXT,
+                   	License INTEGER,
                    	Copyright TEXT,
                    	LicenseURI TEXT,
                    	MetadataURI TEXT,
@@ -148,8 +148,8 @@ namespace Banshee.Base
             try {
                 QuerySingle("SELECT License FROM TrackLicenses LIMIT 1");
             } catch(ApplicationException) {
-                LogCore.Instance.PushDebug("Adding new database column", "License TEXT");
-                Execute("ALTER TABLE TrackLicenses ADD License TEXT");
+                LogCore.Instance.PushDebug("Adding new database column", "License INTEGER");
+                Execute("ALTER TABLE TrackLicenses ADD License INTEGER");
             }
   
             try {
