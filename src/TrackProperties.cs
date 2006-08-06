@@ -31,7 +31,6 @@ using Gtk;
 using Glade;
 using System.Collections;
 using Mono.Unix;
-using System.Web;
 
 using Banshee.Base;
 
