@@ -31,7 +31,7 @@ using Gdk;
 
 using Banshee.Base;
 
-namespace Banshee
+namespace Banshee.Gui
 {
 	public class LicenseRenderer : CellRenderer
 	{

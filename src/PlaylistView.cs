@@ -117,8 +117,7 @@ namespace Banshee
             
             RatingColumn = new PlaylistColumn(this, 
                 Catalog.GetString("Rating"), "Rating",
-                new TreeCellDataFunc(TrackCellRating),
-                new RatingRenderer(),
+                new TreeCellDataFunc(TrackCellRating), new Banshee.Gui.RatingRenderer(),
                 7, (int)ColumnId.Rating);
             columns.Add(RatingColumn);
             
@@ -135,11 +134,10 @@ namespace Banshee
                 new CellRendererText(),
                 9, (int)ColumnId.LastPlayed);
             columns.Add(LastPlayedColumn);
-        	
+            
         	LicenseColumn = new PlaylistColumn(this, 
                 Catalog.GetString("License"), "License",
-                new TreeCellDataFunc(TrackCellLicense),
-                new LicenseRenderer(),
+                new TreeCellDataFunc(TrackCellLicense), new Banshee.Gui.LicenseRenderer(),
                 10, (int)ColumnId.License);
             columns.Add(LicenseColumn);
             
@@ -200,7 +198,7 @@ namespace Banshee
             Selection.Mode = SelectionMode.Multiple;
             
             model.SetSortFunc((int)ColumnId.Track, 
-                new TreeIterCompareFunc(TrackTreeIterCompareFunc));
+                    new TreeIterCompareFunc(TrackTreeIterCompareFunc));
             model.SetSortFunc((int)ColumnId.Artist, 
                 new TreeIterCompareFunc(ArtistTreeIterCompareFunc));
             model.SetSortFunc((int)ColumnId.Title, 
@@ -221,7 +219,7 @@ namespace Banshee
                 new TreeIterCompareFunc(LastPlayedTreeIterCompareFunc));
             model.SetSortFunc((int)ColumnId.License, 
                 new TreeIterCompareFunc(LicenseTreeIterCompareFunc));
-        }    
+        }
 
         private void OnRipToggled(object o, ToggledArgs args)
         {
@@ -302,7 +300,7 @@ namespace Banshee
             return StringFieldCompare(model.IterTrackInfo(a).Genre, 
                 model.IterTrackInfo(b).Genre);
         }
-                
+        
         public int LicenseTreeIterCompareFunc(TreeModel _model, TreeIter a, 
             TreeIter b)
         {
@@ -314,7 +312,7 @@ namespace Banshee
                 return 1;
             else
                 return model.IterTrackInfo(a).License - model.IterTrackInfo(b).License;
-        }  
+        }
         
         public int YearTreeIterCompareFunc(TreeModel _model, TreeIter a,
             TreeIter b)
@@ -455,7 +453,7 @@ namespace Banshee
                 toggle.Active = false;
             }
         }
-
+        
         protected void TrackCellTrack(TreeViewColumn tree_column,
             CellRenderer cell, TreeModel tree_model, TreeIter iter)
         {
@@ -507,10 +505,10 @@ namespace Banshee
             if(ti == null) {
                 return;
             }
-
+            
             SetRendererAttributes((CellRendererText)cell, ti.Genre, iter);
         }
-
+        
         protected void TrackCellLicense(TreeViewColumn tree_column,
             CellRenderer cell, TreeModel tree_model, TreeIter iter)
         {
@@ -519,9 +517,9 @@ namespace Banshee
                 return;
             }
             
-            ((LicenseRenderer)cell).Track = ti;
+            ((Banshee.Gui.LicenseRenderer)cell).Track = ti;
         }
-
+        
         protected void TrackCellYear(TreeViewColumn tree_column,
             CellRenderer cell, TreeModel tree_model, TreeIter iter)
         {
@@ -567,7 +565,7 @@ namespace Banshee
                 return;
             }
              
-            ((RatingRenderer)cell).Track = ti;
+            ((Banshee.Gui.RatingRenderer)cell).Track = ti;
         }
         
         protected void TrackCellLastPlayed(TreeViewColumn tree_column,
@@ -585,10 +583,10 @@ namespace Banshee
             if(lastPlayed > DateTime.MinValue) {
                 disp = lastPlayed.ToString();
             }
-
+            
             SetRendererAttributes((CellRendererText)cell, String.Format("{0}", disp), iter);
         }
-
+        
         public void PlayPath(TreePath path)
         {
             model.PlayPath(path);
